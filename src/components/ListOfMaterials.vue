@@ -23,4 +23,18 @@
             </tr>
         </tbody>
     </table>
+    <!-- <div>
+        {{ loadedIfcTree.type }}
+    </div> -->
 </template>
+
+// <script>
+// import { mapState } from 'vuex';
+
+// export default {
+//   name: 'ListOfMaterials',
+//   computed: {
+//     ...mapState(['loadedIfcTree']),
+//   },
+// };
+// </script>

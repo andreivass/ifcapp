@@ -12,16 +12,18 @@
 <script>
 import IfcManager from '../IFC/IfcManager'
 import { Raycaster, Vector2 } from 'three'
+// import { mapMutations } from 'vuex';
 
 export default {
     name: 'Viewer',
-    props: ['token', 'projectId', 'discipline'],
+    // props: ['token', 'projectId', 'discipline'],
     data() {
         return {
             entityData: '',
         }
     },
     methods: {
+        // ...mapMutations(['setLoadedIfcTree']),
         onLoaded: function() {
             this.addPicking()
             this.setupPick(this)
@@ -46,22 +48,31 @@ export default {
 
             return this.raycaster.intersectObjects(this.IFCManager.scene.ifcModels)
         },
-        pick: function(event) {
+        pick: async function(event) {
             this.found = this.cast(event)[0]
             if (this.found) {
+                let ifc = this.IFCManager;
+                let modelId = this.found.object.modelID;
+
                 this.index = this.found.faceIndex
                 this.geometry = this.found.object.geometry
-                this.id = this.IFCManager.scene.ifcModel.getExpressId(
+                this.id = ifc.scene.ifcModel.getExpressId(
                     this.geometry,
                     this.index
                 )
                 this.entityData = this.id
+
+                let props = await ifc.ifcLoader.ifcManager.getItemProperties(modelId, this.id);
+                console.log('props: ', JSON.stringify(props, null, 2))
             }
         },
         setupPick: function(component) {
             component.threeCanvas = document.getElementById('viewer')
             component.threeCanvas.ondblclick = component.pick
         },
+        // setLoadedIfcTree: function(ifcTree) {
+        //     return ifcTree;
+        // }
     },
     mounted() {
         const self = this
@@ -75,6 +86,12 @@ export default {
                 let file = changed.target.files[0]
                 let ifcURL = URL.createObjectURL(file)
                 self.IFCManager.scene.ifcModel = await self.IFCManager.ifcLoader.loadAsync(ifcURL);
+                
+                console.log('ifcmodel: ', self.IFCManager.scene.ifcModel);
+                // Spacial tree contains all trimmed* elements
+                let ifcProject = await self.IFCManager.ifcLoader.ifcManager.getSpatialStructure(self.IFCManager.scene.ifcModel.modelID);
+                console.log('Spatial tree: ', ifcProject);
+
                 self.IFCManager.scene.add(self.IFCManager.scene.ifcModel.mesh)
                 
                 self.onLoaded()
