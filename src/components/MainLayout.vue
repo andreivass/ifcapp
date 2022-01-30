@@ -6,8 +6,8 @@
                 <NavigationMenu />
             </div>
             <div class="col-10">
-                <Viewer />
-                <ListOfMaterials />
+                <Viewer :ifcTree="ifcTree" @ifc-Tree-Loaded="updateIfcTree"/>
+                <ListOfMaterials :ifcTree="ifcTree" />
             </div>
         </div>
     </div>
@@ -26,6 +26,17 @@ export default {
     NavigationMenu,
     Viewer,
     ListOfMaterials
+  },
+  data() {
+      return {
+          ifcTree : new Object
+      }
+  },
+  methods: {
+      updateIfcTree(loadedIfcTree) {
+          console.log('layout tree: ', loadedIfcTree);
+          this.ifcTree = loadedIfcTree;
+      }
   }
 }
 </script>
