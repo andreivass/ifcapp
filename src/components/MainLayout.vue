@@ -1,7 +1,7 @@
 <template>
-    <PageHeader />
-    <div class="container-xxl">
-        <div class="row">
+    <div class="container-xxl" id="app-container">
+        <PageHeader />
+        <div class="row row-cols-auto">
             <div class="col-2">
                 <NavigationMenu />
             </div>
@@ -29,7 +29,7 @@ export default {
   },
   data() {
       return {
-          ifcTree : new Object
+          ifcTree : new Array
       }
   },
   methods: {
@@ -40,3 +40,9 @@ export default {
   }
 }
 </script>
+
+<style>
+#app-container {
+    margin-top: 0px;
+}
+</style>

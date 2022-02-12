@@ -1,19 +1,30 @@
 <template>
-    <table class="table table-hover">
+    <table class="table table-hover" id="materials-table">
         <thead>
             <tr>
-            <th scope="col">Id</th>
-            <th scope="col">Type</th>
-            <th scope="col">Prop3</th>
-            <th scope="col">Prop4</th>
+                <th scope="col">Guid</th>
+                <th scope="col">Id</th>
+                <th scope="col">IFC Type</th>
+                <th scope="col">Name</th>
+                <th scope="col">ObjectType</th>
             </tr>
         </thead>
-        <tbody v-if="ifcTree.type">
-            <tr v-for="element in ifcTree.children[0].children[0].children[0].children" :key=element.getExpressId>
+        <tbody v-if="ifcTree.length > 0">
+            <tr v-for="element in ifcTree" :key=element.expressId>
+                <td>{{ element.GlobalId.value }}</td>
+                <td>{{ element.expressID }}</td>
+                <td>{{ element.ifcType }}</td>
+                <td>{{ element.Name?.value }}</td>
+                <td>{{ element.ObjectType?.value }}</td>
+            </tr>
+        </tbody>
+        <tbody v-else>
+            <tr>
                 <td>ID</td>
-                <td>{{ element.type }}</td>
+                <td>Prop2</td>
                 <td>Prop3</td>
                 <td>Prop4</td>
+                <td>Prop5</td>
             </tr>
         </tbody>
     </table>
@@ -33,9 +44,22 @@ export default {
       ifcTree: {
           setImmediate: true,
           handler() {
-              console.log('Tree value changed')
+              console.log('Tree value changed');
+              this.prepareIfcTreeData();
           }
+      }
+  },
+  methods: {
+      prepareIfcTreeData() 
+      {
+        
       }
   }
 };
 </script>
+
+<style>
+#materials-table {
+    min-height: 200px;
+}
+</style>

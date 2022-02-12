@@ -74,8 +74,50 @@ export default {
         },
         async loadIfcTree() {
             let ifcProject = await this.IFCManager.ifcLoader.ifcManager.getSpatialStructure(this.IFCManager.scene.ifcModel.modelID);
-            // console.log('viewer tree: ', ifcProject);
-            this.$emit('ifc-Tree-Loaded', ifcProject)
+            console.log('viewer tree: ', ifcProject);
+            // let elementArray = new Array;
+            // await this.iterateChildren(ifcProject, elementArray);
+            let elementArray = new Array;
+            await this.iterateChildren(ifcProject, elementArray);
+            // this.ifcTree = elementArray;
+
+            // console.log('element array', elementArray);
+
+            // var ifcDoor = ifcProject.children[0].children[0].children[0].children[18];
+            // console.log("ifcDoor: ", ifcDoor);
+            // var doorProps = await this.IFCManager.ifcLoader.ifcManager.getItemProperties(0, ifcDoor.expressID);
+            // console.log("doorProps: ", doorProps)
+
+            // var doorPropsAll = await this.IFCManager.ifcLoader.ifcManager.getItemProperties(0, ifcDoor.expressID, true);
+            // console.log("doorPropsAll: ", doorPropsAll);
+
+            // var doorPropsSets = await this.IFCManager.ifcLoader.ifcManager.getPropertySets(0, ifcDoor.expressID);
+            // console.log("doorPropsSets: ", doorPropsSets)
+
+            // this.$emit('ifc-Tree-Loaded', ifcProject)
+            this.$emit('ifc-Tree-Loaded', elementArray.sort((x) => x.ifcType))
+        },
+        async iterateChildren(ifcNode, elArray){
+            if (ifcNode.children.length === 0) {
+                // console.log(elArray);
+                return elArray;
+            } else {
+                for (let index = 0; index < ifcNode.children.length; index++) {
+                    let element = ifcNode.children[index];
+                    let elementAllProps = await this.IFCManager.ifcLoader.ifcManager.getItemProperties(0, element.expressID, true);
+                    elementAllProps.ifcType = element.type;
+                    elArray.push(elementAllProps);
+                    await this.iterateChildren(element, elArray);
+                }
+
+                // ifcProject.children.forEach(async (element, elArray) => {
+                //     var elementAllProps = await this.IFCManager.ifcLoader.ifcManager.getItemProperties(0, element.expressID, true);
+                //     elArray.push(elementAllProps);
+                //     await this.iterateChildren(element, elArray);
+                // });
+            }
+
+            // return elArray;
         }
     },
     mounted() {
