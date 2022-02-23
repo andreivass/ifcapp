@@ -5,7 +5,7 @@
             ID: 
             {{ entityData }}
         </p>
-        <button type="button" @click.prevent="loadIfcTree">Load IFC tree</button>
+        <button type="button" @click.prevent="loadIfcData">Load IFC tree</button>
         <canvas id="viewer" />
     </section>
 </template>
@@ -72,52 +72,61 @@ export default {
             component.threeCanvas = document.getElementById('viewer')
             component.threeCanvas.ondblclick = component.pick
         },
-        async loadIfcTree() {
+        async loadIfcData() {
             let ifcProject = await this.IFCManager.ifcLoader.ifcManager.getSpatialStructure(this.IFCManager.scene.ifcModel.modelID);
             console.log('viewer tree: ', ifcProject);
-            // let elementArray = new Array;
-            // await this.iterateChildren(ifcProject, elementArray);
             let elementArray = new Array;
-            await this.iterateChildren(ifcProject, elementArray);
-            // this.ifcTree = elementArray;
+            
+            await this.parseTree(ifcProject, elementArray);
 
-            // console.log('element array', elementArray);
-
-            // var ifcDoor = ifcProject.children[0].children[0].children[0].children[18];
-            // console.log("ifcDoor: ", ifcDoor);
-            // var doorProps = await this.IFCManager.ifcLoader.ifcManager.getItemProperties(0, ifcDoor.expressID);
-            // console.log("doorProps: ", doorProps)
-
-            // var doorPropsAll = await this.IFCManager.ifcLoader.ifcManager.getItemProperties(0, ifcDoor.expressID, true);
-            // console.log("doorPropsAll: ", doorPropsAll);
-
-            // var doorPropsSets = await this.IFCManager.ifcLoader.ifcManager.getPropertySets(0, ifcDoor.expressID);
-            // console.log("doorPropsSets: ", doorPropsSets)
-
-            // this.$emit('ifc-Tree-Loaded', ifcProject)
-            this.$emit('ifc-Tree-Loaded', elementArray.sort((x) => x.ifcType))
+            this.$emit('ifc-Tree-Loaded', elementArray)
         },
-        async iterateChildren(ifcNode, elArray){
+        // async convertTreeToArray(ifcNode, elArray){
+        //     if (ifcNode.children.length === 0) {
+        //         // console.log(elArray);
+        //         return elArray;
+        //     } else {
+        //         for (let i = 0; i < ifcNode.children.length; i++) {
+        //             let element = ifcNode.children[i];
+        //             let elementAllProps = await this.IFCManager.ifcLoader.ifcManager.getItemProperties(0, element.expressID, true);
+                    
+        //             // let propertySets = await this.IFCManager.ifcLoader.ifcManager.getPropertySets(0, element.expressID, true);
+        //             // console.log(i, 'propertySets', propertySets);
+
+        //             elementAllProps.ifcType = element.type;
+        //             elArray.push(elementAllProps);
+        //             await this.convertTreeToArray(element, elArray);
+        //         }
+        //     }
+        // },
+        async parseTree(ifcNode, buidingArray, storeyName){
             if (ifcNode.children.length === 0) {
-                // console.log(elArray);
-                return elArray;
+
+                return buidingArray;
             } else {
-                for (let index = 0; index < ifcNode.children.length; index++) {
-                    let element = ifcNode.children[index];
+                for (let i = 0; i < ifcNode.children.length; i++) {
+                    let element = ifcNode.children[i];                    
+
+                    // Get detailed property object.
                     let elementAllProps = await this.IFCManager.ifcLoader.ifcManager.getItemProperties(0, element.expressID, true);
+                    
+                    if (element.type === 'IFCBUILDINGSTOREY') {
+                        storeyName = elementAllProps.Name.value;
+                    }
+
+                    // Transfer IFC Type property to detailt property object.
                     elementAllProps.ifcType = element.type;
-                    elArray.push(elementAllProps);
-                    await this.iterateChildren(element, elArray);
+
+                    // Add storey nr property.
+                    elementAllProps.buildingStorey = storeyName;
+
+                    // Add object to parent building storey.
+                    buidingArray.push(elementAllProps);
+                    
+                    // Call method recursively on child elements.
+                    await this.parseTree(element, buidingArray, storeyName);
                 }
-
-                // ifcProject.children.forEach(async (element, elArray) => {
-                //     var elementAllProps = await this.IFCManager.ifcLoader.ifcManager.getItemProperties(0, element.expressID, true);
-                //     elArray.push(elementAllProps);
-                //     await this.iterateChildren(element, elArray);
-                // });
             }
-
-            // return elArray;
         }
     },
     mounted() {
@@ -132,13 +141,6 @@ export default {
                 let file = changed.target.files[0]
                 let ifcURL = URL.createObjectURL(file)
                 self.IFCManager.scene.ifcModel = await self.IFCManager.ifcLoader.loadAsync(ifcURL);
-                
-                // console.log('ifcmodel: ', self.IFCManager.scene.ifcModel);
-                // Spacial tree contains all trimmed* elements
-                // let ifcProject = await self.IFCManager.ifcLoader.ifcManager.getSpatialStructure(self.IFCManager.scene.ifcModel.modelID);
-                // console.log('Spatial tree: ', ifcProject);
-                // this.loadIfcTree(ifcProject);
-
                 self.IFCManager.scene.add(self.IFCManager.scene.ifcModel.mesh)
                 
                 self.onLoaded()
