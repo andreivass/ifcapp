@@ -1,11 +1,22 @@
 <template>
     <section>
-        <input type="file" id="file-input" />
-        <p id="properties-text">
-            ID: 
-            {{ entityData }}
-        </p>
-        <button type="button" @click.prevent="loadIfcData">Load IFC tree</button>
+        <div class="row">
+            <div class="col-sm">
+                Projekti nimi - IFC faili nimi.
+            </div>
+            <div class="col-sm">
+                <input type="file" id="file-input" />
+                <p id="properties-text">
+                    ID: 
+                    {{ entityData }}
+                </p>
+            </div>
+            <div class="col-sm">
+                <button type="button" @click.prevent="loadIfcData">Load IFC tree</button>
+            </div>
+        </div>
+        
+        
         <canvas id="viewer" />
     </section>
 </template>

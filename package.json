@@ -9,9 +9,11 @@
   },
   "dependencies": {
     "@types/three": "^0.137.0",
+    "axios": "^0.26.1",
     "core-js": "^3.6.5",
     "three": "^0.137.5",
     "vue": "^3.0.0",
+    "vue-router": "4",
     "vue-tree-list": "^1.5.0",
     "vuex": "^3.6.2",
     "web-ifc-three": "^0.0.103"
