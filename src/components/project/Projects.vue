@@ -1,7 +1,7 @@
 <template>
   <div class="list row">
     <div class="col-md-6">
-      <h4>Proektide nimekiri</h4>
+      <h4>Projektide nimekiri</h4>
       <ul class="list-group">
         <li class="list-group-item"
           :class="{ active: index == currentIndex }"
@@ -33,11 +33,12 @@
         </div>
         <div>
           <router-link  :to="'/project/' + currentProject.projectId" class="btn btn-outline-primary">Ava projekt</router-link>
+          <router-link  :to="'/editproject/' + currentProject.projectId" class="btn btn-outline-warning">Muuda projekti</router-link>
        </div>
       </div>
       <div v-else>
         <br />
-        <p>Please click on a Project...</p>
+        <p>Vali projekt nimekirjast...</p>
       </div>
     </div>
     <div class="mt-3">
@@ -45,8 +46,8 @@
     </div>
   </div>
 </template>
-<script>
 
+<script>
 import ProjectDataService from "../../services/projectDataService"
 
 export default {
@@ -85,6 +86,7 @@ export default {
   }
 };
 </script>
+
 <style>
 .list {
   text-align: left;

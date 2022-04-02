@@ -1,28 +1,23 @@
 <template>
     <section>
-        <div class="row">
+        <div v-if="dataLoaded == false" class="row">
             <div class="col-sm">
-                Projekti nimi - IFC faili nimi.
-            </div>
-            <div class="col-sm">
-                <input type="file" id="file-input" />
-                <p id="properties-text">
+                <input type="file" id="file-input"  @click="fileLoaded = true"/>
+                <!-- <p id="properties-text">
                     ID: 
                     {{ entityData }}
-                </p>
+                </p> -->
             </div>
-            <div class="col-sm">
-                <button type="button" @click.prevent="loadIfcData">Load IFC tree</button>
+            <div v-if="fileLoaded == true" class="col-sm">
+                <button type="button" @click.prevent="loadIfcData">Lae IFC andmed</button>
             </div>
         </div>
-        
-        
         <canvas id="viewer" />
     </section>
 </template>
 
 <script>
-import IfcManager from '../IFC/IfcManager'
+import IfcManager from '../../IFC/IfcManager'
 import { Raycaster, Vector2 } from 'three'
 // import { mapMutations } from 'vuex';
 
@@ -33,6 +28,8 @@ export default {
     data() {
         return {
             entityData: '',
+            dataLoaded: false,
+            fileLoaded: false
         }
     },
     methods: {
@@ -40,6 +37,7 @@ export default {
         onLoaded() {
             this.addPicking()
             this.setupPick(this)
+            this.dataLoaded = false
         },
         addPicking() {
             this.raycaster = new Raycaster()
@@ -91,25 +89,9 @@ export default {
             await this.parseTree(ifcProject, elementArray);
 
             this.$emit('ifc-Tree-Loaded', elementArray)
-        },
-        // async convertTreeToArray(ifcNode, elArray){
-        //     if (ifcNode.children.length === 0) {
-        //         // console.log(elArray);
-        //         return elArray;
-        //     } else {
-        //         for (let i = 0; i < ifcNode.children.length; i++) {
-        //             let element = ifcNode.children[i];
-        //             let elementAllProps = await this.IFCManager.ifcLoader.ifcManager.getItemProperties(0, element.expressID, true);
-                    
-        //             // let propertySets = await this.IFCManager.ifcLoader.ifcManager.getPropertySets(0, element.expressID, true);
-        //             // console.log(i, 'propertySets', propertySets);
 
-        //             elementAllProps.ifcType = element.type;
-        //             elArray.push(elementAllProps);
-        //             await this.convertTreeToArray(element, elArray);
-        //         }
-        //     }
-        // },
+            this.dataLoaded = true;
+        },
         async parseTree(ifcNode, buidingArray, storeyName){
             if (ifcNode.children.length === 0) {
 
@@ -157,7 +139,7 @@ export default {
                 self.onLoaded()
             },
             false
-        )
+        );
     },
 }
 </script>

@@ -12,10 +12,10 @@
       </div>
       <div class="navbar-nav">
         <li class="nav-item mr-sm-2">
-          <router-link to="/add" class="nav-link">Login</router-link>
+          <router-link to="/addproject" class="nav-link">Login</router-link>
         </li>
         <li class="nav-item mr-sm-2">
-          <router-link to="/add" class="nav-link">Logout</router-link>
+          <router-link to="/addproject" class="nav-link">Logout</router-link>
         </li>
       </div>
     </nav>

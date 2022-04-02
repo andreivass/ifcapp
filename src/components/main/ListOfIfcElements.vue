@@ -24,31 +24,31 @@
         </tbody>
         <tbody v-else>
             <tr>
-                Load data.
+                Andmed ei ole veel sisse laetud.
             </tr>
         </tbody>
     </table>
-    <div v-if="showTreeTable">
+    <!-- <div v-if="showTreeTable">
         <VueTreeList :model="treeData"
         default-tree-node-name="new node"
         default-leaf-node-name="new leaf"
         v-bind:default-expanded="false">
             {{  treeData  }}
         </VueTreeList>
-    </div>
+    </div> -->
 </template>
 
 <script>
-import { VueTreeList, Tree } from 'vue-tree-list'
+// import { VueTreeList, Tree } from 'vue-tree-list'
 
 export default {
   name: 'ListOfMaterials',
   props: [
       'ifcTree'
   ],
-  components: {
-      VueTreeList
-  },
+  // components: {
+  //     VueTreeList
+  // },
   data() {
     return {
         treeData: {},
@@ -60,52 +60,52 @@ export default {
           setImmediate: true,
           handler() {
               console.log('Tree value changed');
-              if (!this.showTreeTable) {
-                this.prepareIfcTreeData();
-              }
+              // if (!this.showTreeTable) {
+              //   this.prepareIfcTreeData();
+              // }
               
           }
       }
   },
-  methods: {
-      prepareIfcTreeData() 
-      {
-        // TODO: parse array data to some structure
-        this.treeData = new Tree([
-          {
-            name: 'Node 1',
-            id: 1,
-            pid: 0,
-            dragDisabled: true,
-            addTreeNodeDisabled: true,
-            addLeafNodeDisabled: true,
-            editNodeDisabled: true,
-            delNodeDisabled: true,
-            children: [
-              {
-                name: 'Node 1-2',
-                id: 2,
-                isLeaf: true,
-                pid: 1
-              }
-            ]
-          },
-          {
-            name: 'Node 2',
-            id: 3,
-            pid: 0,
-            disabled: true
-          },
-          {
-            name: 'Node 3',
-            id: 4,
-            pid: 0
-          }
-        ]);
+  // methods: {
+  //     prepareIfcTreeData() 
+  //     {
+  //       // TODO: parse array data to some structure
+  //       this.treeData = new Tree([
+  //         {
+  //           name: 'Node 1',
+  //           id: 1,
+  //           pid: 0,
+  //           dragDisabled: true,
+  //           addTreeNodeDisabled: true,
+  //           addLeafNodeDisabled: true,
+  //           editNodeDisabled: true,
+  //           delNodeDisabled: true,
+  //           children: [
+  //             {
+  //               name: 'Node 1-2',
+  //               id: 2,
+  //               isLeaf: true,
+  //               pid: 1
+  //             }
+  //           ]
+  //         },
+  //         {
+  //           name: 'Node 2',
+  //           id: 3,
+  //           pid: 0,
+  //           disabled: true
+  //         },
+  //         {
+  //           name: 'Node 3',
+  //           id: 4,
+  //           pid: 0
+  //         }
+  //       ]);
 
-        this.showTreeTable = true;
-      }
-  }
+  //       this.showTreeTable = true;
+  //     }
+  // }
 }
 </script>
 

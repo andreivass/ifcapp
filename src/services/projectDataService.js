@@ -15,11 +15,5 @@ class ProjectDataService {
   delete(id) {
     return http.delete(`/projects/${id}`);
   }
-//   deleteAll() {
-//     return http.delete(`/tutorials`);
-//   }
-//   findByTitle(title) {
-//     return http.get(`/tutorials?title=${title}`);
-//   }
 }
 export default new ProjectDataService();

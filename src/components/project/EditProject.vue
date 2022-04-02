@@ -38,10 +38,12 @@
     <p>Projekti ei leitud.</p>
   </div>
 </template>
+
 <script>
 import ProjectDataService from "../../services/projectDataService";
+
 export default {
-  name: "project",
+  name: "edit-project",
   data() {
     return {
       currentProject: null,
@@ -86,6 +88,7 @@ export default {
   }
 };
 </script>
+
 <style>
 .edit-form {
   max-width: 300px;

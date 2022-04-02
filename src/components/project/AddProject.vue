@@ -2,7 +2,7 @@
   <div class="submit-form">
     <div v-if="!submitted">
       <div class="form-group">
-        <label for="name">Name</label>
+        <label for="name">Nimi</label>
         <input
           type="text"
           class="form-control"
@@ -13,7 +13,7 @@
         />
       </div>
       <div class="form-group">
-        <label for="code">Code</label>
+        <label for="code">Kood</label>
         <input
           type="text"
           class="form-control"
@@ -24,7 +24,7 @@
         />
       </div>
       <div class="form-group">
-        <label for="description">Description</label>
+        <label for="description">Kirjeldus</label>
         <input
           class="form-control"
           id="description"
@@ -34,7 +34,7 @@
         />
       </div>
       <div class="form-group">
-        <label for="ifcfilename">IFC file name</label>
+        <label for="ifcfilename">IFC faili nimi</label>
         <input
           type="text"
           class="form-control"
@@ -44,18 +44,20 @@
           name="ifc-file-name"
         />
       </div>
-      <button @click="saveProject" class="btn btn-success">Submit</button>
+      <button @click="saveProject" class="btn btn-success">Salvesta</button>
     </div>
     <div v-else>
       <h4>You submitted successfully!</h4>
-      <button class="btn btn-success" @click="newProject">Add</button>
+      <button class="btn btn-success" @click="newProject">Lisa</button>
     </div>
   </div>
 </template>
+
 <script>
 import ProjectDataService from "../../services/projectDataService";
+
 export default {
-  name: "add-tutorial",
+  name: "add-project",
   data() {
     return {
       project: {
@@ -97,6 +99,7 @@ export default {
   }
 };
 </script>
+
 <style>
 .submit-form {
   max-width: 300px;

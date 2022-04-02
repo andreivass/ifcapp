@@ -20,12 +20,12 @@ const routes =  [
   {
     path: "/project/:id",
     name: "project-details",
-    component: () => import("./components/project/Project.vue")
+    component: () => import("./components/project/ProjectDetails.vue")
   },
   {
-    path: "/mainlayout",
-    name: "main-layout",
-    component: () => import("./components/MainLayout")
+    path: "/editproject/:id",
+    name: "edit-project",
+    component: () => import("./components/project/EditProject.vue")
   }
 ];
 const router = createRouter({
