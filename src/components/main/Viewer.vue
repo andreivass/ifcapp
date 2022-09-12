@@ -18,12 +18,12 @@
 
 <script>
 import IfcManager from '../../IFC/IfcManager'
-import { Raycaster, Vector2 } from 'three'
+import { Raycaster, Vector2, MeshLambertMaterial } from 'three'
 // import { mapMutations } from 'vuex';
 
 export default {
     name: 'Viewer',
-    props: ['ifcTree'],
+    props: ['ifcTree', 'selectedElements'],
     emits: ['ifc-Tree-Loaded'],
     data() {
         return {
@@ -60,6 +60,9 @@ export default {
             return this.raycaster.intersectObjects(this.IFCManager.scene.ifcModels)
         },
         async pick(event) {
+            // Creates subset material
+            
+            
             this.found = this.cast(event)[0]
             if (this.found) {
                 let ifc = this.IFCManager;
@@ -67,15 +70,31 @@ export default {
 
                 this.index = this.found.faceIndex
                 this.geometry = this.found.object.geometry
-                this.id = ifc.scene.ifcModel.getExpressId(
-                    this.geometry,
-                    this.index
-                )
+                this.id = ifc.scene.ifcModel.getExpressId(this.geometry, this.index);
                 this.entityData = this.id
 
-                let props = await ifc.ifcLoader.ifcManager.getItemProperties(modelId, this.id);
-                console.log('props: ', JSON.stringify(props, null, 2))
+                // let props = await ifc.ifcLoader.ifcManager.getItemProperties(modelId, this.id);
+                // console.log('props: ', JSON.stringify(props, null, 2))
+
+                var elementIds = [this.id];
+                this.highlightElements(modelId, ifc, elementIds)
             }
+        },
+        highlightElements(modelId, ifcManager, elementIds){
+            const preselectMat = new MeshLambertMaterial({
+                transparent: true,
+                opacity: 0.6,
+                color: 0xff88ff,
+                depthTest: false
+            });
+
+            ifcManager.ifcLoader.ifcManager.createSubset({
+                    modelID: modelId,
+                    ids: elementIds,
+                    material: preselectMat,
+                    scene: ifcManager.scene,
+                    removePrevious: true
+                });
         },
         setupPick(component) {
             component.threeCanvas = document.getElementById('viewer')
@@ -93,6 +112,7 @@ export default {
             this.dataLoaded = true;
         },
         async parseTree(ifcNode, buidingArray, storeyName){
+            //console.log("ifcManager: ", this.IFCManager);
             if (ifcNode.children.length === 0) {
 
                 return buidingArray;
@@ -112,6 +132,9 @@ export default {
 
                     // Add storey nr property.
                     elementAllProps.buildingStorey = storeyName;
+
+                    // Add prop for selection.
+                    elementAllProps.selected = false;
 
                     // Add object to parent building storey.
                     buidingArray.push(elementAllProps);
@@ -141,6 +164,22 @@ export default {
             false
         );
     },
+    watch: {
+        async selectedElements(newVal) {
+            // TODO: somehow highliht selected items
+            // console.log("new selected items value: ", newVal);
+            if (newVal.length > 0){
+                console.log(this.IFCManager);
+                this.highlightElements(0, this.IFCManager, 59553)
+                //console.log(newVal[0].object.modelId);
+                // await this.IFCManager.scene.ifcModel.hideAllItems(0);
+                await this.IFCManager.ifcLoader.ifcManager.hideItems(59753);
+            } else {
+                console.log("Empty list")
+                // await self.IFCManager.ifcLoader.showAllItems();
+            }
+        }
+    }
 }
 </script>
 

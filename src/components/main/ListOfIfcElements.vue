@@ -1,7 +1,9 @@
 <template>
+  <button type="button" @click.prevent="createWp">Uus tööpakett</button>
     <table class="table table-hover" id="materials-table">
         <thead>
             <tr>
+                <th scope="col">Select</th>
                 <th scope="col">Row nr</th>
                 <th scope="col">Storey</th>
                 <!-- <th scope="col">Guid</th>
@@ -13,6 +15,7 @@
         </thead>
         <tbody v-if="ifcTree.length > 0">
             <tr v-for="(element, index) in ifcTree" :key=element.expressId>
+                <td><input type="checkbox" id="checkbox" v-model="element.selected" @change="elementSelect(element)"></td>
                 <td>{{ index + 1 }}</td>
                 <td>{{ element.buildingStorey }}</td>
                 <!-- <td>{{ element.GlobalId.value }}</td>
@@ -46,13 +49,15 @@ export default {
   props: [
       'ifcTree'
   ],
+  emits: ['ifc-elements-selected'],
   // components: {
   //     VueTreeList
   // },
   data() {
     return {
         treeData: {},
-        showTreeTable: false
+        showTreeTable: false,
+        selectedItems: new Array
     }
   },
   watch: {
@@ -67,6 +72,25 @@ export default {
           }
       }
   },
+  methods: {
+    createWp(){
+      // var selectedItems = this.ifcTree.filter(o => {
+      //   return o.selected == true;
+      // });
+
+      console.log("Create WP", this.selectedItems);
+
+      this.$emit('ifc-elements-selected', this.selectedItems)
+    },
+    elementSelect(element){
+      if (this.selectedItems.includes(element)) {
+        this.selectedItems.splice(this.selectedItems.indexOf(element))
+      }
+      else {
+        this.selectedItems.push(element);
+      }
+    }
+  }
   // methods: {
   //     prepareIfcTreeData() 
   //     {

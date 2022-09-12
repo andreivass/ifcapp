@@ -6,9 +6,6 @@
         <li class="nav-item">
           <router-link to="/projects" class="nav-link">Projektid</router-link>
         </li>
-        <li class="nav-item">
-          <router-link to="/mainlayout" class="nav-link">Viewer</router-link>
-        </li>
       </div>
       <div class="navbar-nav">
         <li class="nav-item mr-sm-2">

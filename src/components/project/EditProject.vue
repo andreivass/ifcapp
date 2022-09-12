@@ -65,7 +65,7 @@ export default {
       ProjectDataService.update(this.currentProject.projectId, this.currentProject)
         .then(response => {
           console.log(response.data);
-          this.message = 'The project was updated successfully!';
+          this.message = 'Projekt salvestatud!';
         })
         .catch(e => {
           console.log(e);

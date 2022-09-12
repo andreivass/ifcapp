@@ -13,8 +13,8 @@
                 <NavigationMenu />
             </div>
             <div class="col-10">
-                <Viewer :ifcTree="ifcTree" @ifc-Tree-Loaded="updateIfcTree"/>
-                <ListOfIfcElements :ifcTree="ifcTree" />
+                <Viewer :ifcTree="ifcTree" @ifc-Tree-Loaded="updateIfcTree" :selectedElements="selectedElements" />
+                <ListOfIfcElements :ifcTree="ifcTree" @ifc-elements-selected="updateSelectedElements" />
             </div>
         </div>
     </div>
@@ -37,7 +37,8 @@ export default {
     return {
       currentProject: null,
       ifcTree : new Array,
-      statusMessage: ""
+      statusMessage: "",
+      selectedElements : new Array,
     };
   },
   methods: {
@@ -55,6 +56,9 @@ export default {
         console.log('project details tree: ', loadedIfcTree);
         this.statusMessage = "Vali IFC elemendid tööpaketi loomiseks."
         this.ifcTree = loadedIfcTree;
+    },
+    updateSelectedElements(selectedElements){
+        this.selectedElements = selectedElements;
     }
   },
   mounted() {
