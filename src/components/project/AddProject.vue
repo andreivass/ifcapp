@@ -33,7 +33,7 @@
           name="description"
         />
       </div>
-      <div class="form-group">
+      <!-- <div class="form-group">
         <label for="ifcfilename">IFC faili nimi</label>
         <input
           type="text"
@@ -43,7 +43,7 @@
           v-model="project.ifcfilename"
           name="ifc-file-name"
         />
-      </div>
+      </div> -->
       <button @click="saveProject" class="btn btn-success">Salvesta</button>
     </div>
     <div v-else>

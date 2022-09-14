@@ -1,6 +1,6 @@
 <template>
   <div v-if="currentProject" class="project-details">
-    <h4>Projekt: {{ currentProject.name }} {{ currentProject.code }}</h4>
+    <h4>Projekt: {{ currentProject.code }} - {{ currentProject.name }}</h4>
     <div>Rakenduse olek: {{ statusMessage }}</div>
   </div>
   <div v-else>
@@ -13,7 +13,7 @@
                 <NavigationMenu />
             </div>
             <div class="col-10">
-                <Viewer :ifcTree="ifcTree" @ifc-Tree-Loaded="updateIfcTree" :selectedElements="selectedElements" />
+                <Viewer :ifcTree="ifcTree" @ifc-Tree-Loaded="updateIfcTree" :selectedElements="selectedElements" :ifcFileName="ifcFileName" @save-Ifc-Name="saveIfcName"/>
                 <ListOfIfcElements :ifcTree="ifcTree" @ifc-elements-selected="updateSelectedElements" />
             </div>
         </div>
@@ -39,6 +39,7 @@ export default {
       ifcTree : new Array,
       statusMessage: "",
       selectedElements : new Array,
+      ifcFileName:''
     };
   },
   methods: {
@@ -46,6 +47,7 @@ export default {
       ProjectDataService.get(id)
         .then(response => {
           this.currentProject = response.data;
+          this.ifcFileName = this.currentProject.ifcFileName;
           console.log("Project loaded in details", response.data);
         })
         .catch(e => {
@@ -59,10 +61,24 @@ export default {
     },
     updateSelectedElements(selectedElements){
         this.selectedElements = selectedElements;
+    },
+    saveIfcName(ifcFileName){
+      this.currentProject.ifcFileName = ifcFileName;
+      this.updateProject();
+    },
+    updateProject() {
+      ProjectDataService.update(this.currentProject.projectId, this.currentProject)
+        .then(response => {
+          console.log(response.data);
+          this.message = 'Projekt salvestatud!';
+        })
+        .catch(e => {
+          console.log(e);
+        });
     }
   },
   mounted() {
-    this.statusMessage = "Vali IFC fail";
+    this.statusMessage = "Vali IFC fail ja lae sisse andmed";
     this.getProject(this.$route.params.id);
   }
 };

@@ -1,15 +1,20 @@
 <template>
     <section>
-        <div v-if="dataLoaded == false" class="row">
-            <div class="col-sm">
-                <input type="file" id="file-input"  @click="fileLoaded = true"/>
-                <!-- <p id="properties-text">
-                    ID: 
-                    {{ entityData }}
-                </p> -->
+        <div class="row">
+            <div v-if="dataLoaded == false && fileLoaded == false" class="col-sm">
+                <input type="file" id="file-input"/>
             </div>
-            <div v-if="fileLoaded == true" class="col-sm">
+            <div v-if="dataLoaded == false && fileLoaded == true && this.ifcFileNameSaved == false" class="col-sm">
+                <button type="button" @click.prevent="reloadPage()">Vali teine IFC fail</button>
+            </div>
+            <div v-if="dataLoaded == false && fileLoaded == true" class="col-sm">
                 <button type="button" @click.prevent="loadIfcData">Lae IFC andmed</button>
+            </div>
+            <div v-if="dataLoaded == true && fileLoaded == true && savedFileLoaded == false" class="col-sm">
+                <button type="button" @click.prevent="saveIfcName">Salvesta IFC fail projektile</button>
+            </div>
+            <div v-if="warningMessage.length > 0">
+                {{ warningMessage }}
             </div>
         </div>
         <canvas id="viewer" />
@@ -19,21 +24,23 @@
 <script>
 import IfcManager from '../../IFC/IfcManager'
 import { Raycaster, Vector2, MeshLambertMaterial } from 'three'
-// import { mapMutations } from 'vuex';
 
 export default {
     name: 'Viewer',
-    props: ['ifcTree', 'selectedElements'],
-    emits: ['ifc-Tree-Loaded'],
+    props: ['ifcTree', 'selectedElements', 'ifcFileName'],
+    emits: ['ifc-Tree-Loaded', 'save-Ifc-Name'],
     data() {
         return {
             entityData: '',
             dataLoaded: false,
-            fileLoaded: false
+            fileLoaded: false,
+            ifcFileNameSaved: false,
+            updatedIfcFileName: '',
+            warningMessage: '',
+            savedFileLoaded: false
         }
     },
     methods: {
-        // ...mapMutations(['setLoadedIfcTree']),
         onLoaded() {
             this.addPicking()
             this.setupPick(this)
@@ -61,8 +68,6 @@ export default {
         },
         async pick(event) {
             // Creates subset material
-            
-            
             this.found = this.cast(event)[0]
             if (this.found) {
                 let ifc = this.IFCManager;
@@ -73,8 +78,8 @@ export default {
                 this.id = ifc.scene.ifcModel.getExpressId(this.geometry, this.index);
                 this.entityData = this.id
 
-                // let props = await ifc.ifcLoader.ifcManager.getItemProperties(modelId, this.id);
-                // console.log('props: ', JSON.stringify(props, null, 2))
+                let props = await ifc.ifcLoader.ifcManager.getItemProperties(modelId, this.id);
+                console.log('selected element props: ', JSON.stringify(props, null, 2))
 
                 var elementIds = [this.id];
                 this.highlightElements(modelId, ifc, elementIds)
@@ -143,26 +148,52 @@ export default {
                     await this.parseTree(element, buidingArray, storeyName);
                 }
             }
+        },
+        reloadPage() {
+            window.location.reload();
+        },
+        setIfcName(ifcName){
+            this.updatedIfcFileName = ifcName;
+        },
+        saveIfcName() {
+            this.$emit('save-Ifc-Name', this.updatedIfcFileName)
+            this.savedFileLoaded = true;
         }
     },
     mounted() {
         const self = this
-        this.IFCManager = new IfcManager('viewer')
+        this.IFCManager = new IfcManager('viewer');
 
-        let input = document.getElementById('file-input')
+        if (this.ifcFileName.length > 0){
+            this.ifcFileNameSaved = true;
+        }
+
+        let input = document.getElementById('file-input');
 
         input.addEventListener(
             'change',
              async function(changed) {
-                let file = changed.target.files[0]
-                let ifcURL = URL.createObjectURL(file)
-                self.IFCManager.scene.ifcModel = await self.IFCManager.ifcLoader.loadAsync(ifcURL);
-                self.IFCManager.scene.add(self.IFCManager.scene.ifcModel.mesh)
+                let file = changed.target.files[0];
                 
-                self.onLoaded()
+                if (self.ifcFileNameSaved == false || file.name == self.ifcFileName){
+                    let ifcURL = URL.createObjectURL(file);
+                    self.IFCManager.scene.ifcModel = await self.IFCManager.ifcLoader.loadAsync(ifcURL);
+                    self.IFCManager.scene.add(self.IFCManager.scene.ifcModel.mesh);
+
+                    self.onLoaded();
+                    self.fileLoaded = true;
+                    self.setIfcName(file.name);
+                    self.warningMessage = '';
+
+                    if (file.name == self.ifcFileName){
+                        self.savedFileLoaded = true;
+                    }
+                } else {
+                    self.warningMessage = 'Vallitud vale IFC fail , vali: ' + self.ifcFileName;
+                }
             },
             false
-        );
+        );      
     },
     watch: {
         async selectedElements(newVal) {
