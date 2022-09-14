@@ -13,8 +13,14 @@
                 <NavigationMenu />
             </div>
             <div class="col-10">
-                <Viewer :ifcTree="ifcTree" @ifc-Tree-Loaded="updateIfcTree" :selectedElements="selectedElements" :ifcFileName="ifcFileName" @save-Ifc-Name="saveIfcName"/>
-                <ListOfIfcElements :ifcTree="ifcTree" @ifc-elements-selected="updateSelectedElements" />
+                <Viewer 
+                :ifcTree="ifcTree" 
+                @ifc-Tree-Loaded="updateIfcTree" 
+                :selectedElements="selectedElements" 
+                :ifcFileName="ifcFileName" 
+                @save-Ifc-Name="saveIfcName" 
+                @set-Ifc-Status-Ready="setIfcStatusReady"/>
+                <ListOfIfcElements :ifcTree="ifcTree" :ifcModelReady="ifcModelReady" @ifc-elements-selected="updateSelectedElements" />
             </div>
         </div>
     </div>
@@ -39,7 +45,8 @@ export default {
       ifcTree : new Array,
       statusMessage: "",
       selectedElements : new Array,
-      ifcFileName:''
+      ifcFileName:'',
+      ifcModelReady: false
     };
   },
   methods: {
@@ -75,6 +82,11 @@ export default {
         .catch(e => {
           console.log(e);
         });
+      
+        this.ifcModelReady = true;
+    },
+    setIfcStatusReady(){
+      this.ifcModelReady = true;
     }
   },
   mounted() {
@@ -86,7 +98,8 @@ export default {
 
 <style>
 .project-details {
-  max-width: 300px;
+  max-width: 600px;
+  height: auto;
   margin: auto;
 }
 </style>

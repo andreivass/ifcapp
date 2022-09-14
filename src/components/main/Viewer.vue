@@ -1,6 +1,6 @@
 <template>
     <section>
-        <div class="row">
+        <div class="row viewer">
             <div v-if="dataLoaded == false && fileLoaded == false" class="col-sm">
                 <input type="file" id="file-input"/>
             </div>
@@ -115,6 +115,10 @@ export default {
             this.$emit('ifc-Tree-Loaded', elementArray)
 
             this.dataLoaded = true;
+
+            if (this.savedFileLoaded == true){
+                this.setIfcStatusReady();
+            }
         },
         async parseTree(ifcNode, buidingArray, storeyName){
             //console.log("ifcManager: ", this.IFCManager);
@@ -158,6 +162,9 @@ export default {
         saveIfcName() {
             this.$emit('save-Ifc-Name', this.updatedIfcFileName)
             this.savedFileLoaded = true;
+        },
+        setIfcStatusReady(){
+            this.$emit('set-Ifc-Status-Ready');
         }
     },
     mounted() {
@@ -215,9 +222,15 @@ export default {
 </script>
 
 <style>
-#viewer {
+.viewer {
     width: 100%;
-    height: 100%;
+    height: auto;
+}
+
+
+#viewer {
+    width: 100% !important;
+    height: auto !important;
 }
 
 #file-input {

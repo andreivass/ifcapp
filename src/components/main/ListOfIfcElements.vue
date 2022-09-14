@@ -1,5 +1,7 @@
 <template>
-  <button type="button" @click.prevent="createWp">Uus tööpakett</button>
+  <div v-if="ifcModelReady == true">
+    <button type="button" @click.prevent="createWp">Uus tööpakett</button>
+  </div>
     <table class="table table-hover" id="materials-table">
         <thead>
             <tr>
@@ -47,7 +49,7 @@
 export default {
   name: 'ListOfMaterials',
   props: [
-      'ifcTree'
+      'ifcTree', 'ifcModelReady'
   ],
   emits: ['ifc-elements-selected'],
   // components: {
