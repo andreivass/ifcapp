@@ -99,19 +99,17 @@ export default {
   },
   methods: {
     createWp(){
-      // var selectedItems = this.ifcTree.filter(o => {
-      //   return o.selected == true;
-      // });
-
-      console.log("Create WP", this.selectedItems);
       this.show = true;
-      //this.$emit('ifc-elements-selected', this.selectedItems)
+      // TODO: open modal and create WP.
     },
     elementSelect(element){
+      // TODO: change selection color in viewer
       if (this.selectedItems.includes(element)) {
+        console.log('element unselected');
         this.selectedItems.splice(this.selectedItems.indexOf(element))
       }
       else {
+        console.log('element selected');
         this.selectedItems.push(element);
       }
     },

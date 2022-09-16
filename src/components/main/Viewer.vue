@@ -73,10 +73,11 @@ export default {
                 let ifc = this.IFCManager;
                 let modelId = this.found.object.modelID;
 
-                this.index = this.found.faceIndex
-                this.geometry = this.found.object.geometry
+                this.index = this.found.faceIndex;
+                this.geometry = this.found.object.geometry;
+                console.log('geometry: ', this.geometry);
                 this.id = ifc.scene.ifcModel.getExpressId(this.geometry, this.index);
-                this.entityData = this.id
+                this.entityData = this.id;
 
                 let props = await ifc.ifcLoader.ifcManager.getItemProperties(modelId, this.id);
                 console.log('selected element props: ', JSON.stringify(props, null, 2))
@@ -86,6 +87,8 @@ export default {
             }
         },
         highlightElements(modelId, ifcManager, elementIds){
+            console.log('highlight', elementIds);
+            const ifc = ifcManager.ifcLoader.ifcManager;
             const preselectMat = new MeshLambertMaterial({
                 transparent: true,
                 opacity: 0.6,
@@ -93,13 +96,17 @@ export default {
                 depthTest: false
             });
 
-            ifcManager.ifcLoader.ifcManager.createSubset({
+            ifc.createSubset({
                     modelID: modelId,
                     ids: elementIds,
                     material: preselectMat,
                     scene: ifcManager.scene,
                     removePrevious: true
                 });
+                
+            // TODO: remove selection color
+            // need to store material
+            // ifc.removeSubset(modelId, preselectMat);
         },
         setupPick(component) {
             component.threeCanvas = document.getElementById('viewer')
@@ -206,8 +213,9 @@ export default {
         async selectedElements(newVal) {
             // TODO: somehow highliht selected items
             // console.log("new selected items value: ", newVal);
+            console.log("selected items change in viewer comp")
             if (newVal.length > 0){
-                console.log(this.IFCManager);
+                // console.log(this.IFCManager);
                 this.highlightElements(0, this.IFCManager, 59553)
                 //console.log(newVal[0].object.modelId);
                 // await this.IFCManager.scene.ifcModel.hideAllItems(0);
