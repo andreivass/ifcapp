@@ -66,52 +66,61 @@
 </template>
 
 <script>
-// import { VueTreeList, Tree } from 'vue-tree-list'
 
 export default {
-  name: 'ListOfMaterials',
+  name: 'ListOfIfcElements',
   props: [
-      'ifcTree', 'ifcModelReady'
+      'ifcModelReady'
   ],
-  emits: ['ifc-elements-selected'],
-  // components: {
-  //     VueTreeList
-  // },
+  emits: ['listElementsSelectionChange', 'asd'],
   data() {
     return {
         treeData: {},
         showTreeTable: false,
-        selectedItems: new Array,
+        ifcTree: new Array,
+        materialsListSelectedElements: new Array,
         show: false
     }
   },
-  watch: {
-      ifcTree: {
-          setImmediate: true,
-          handler() {
-              console.log('Tree value changed');
-              // if (!this.showTreeTable) {
-              //   this.prepareIfcTreeData();
-              // }
+  // watch: {
+  //     ifcTree: {
+  //         setImmediate: true,
+  //         handler() {
+  //             console.log('Tree value changed');
+  //             // if (!this.showTreeTable) {
+  //             //   this.prepareIfcTreeData();
+  //             // }
               
-          }
-      }
-  },
+  //         }
+  //     }
+  // },
   methods: {
+    updateListOfElements(list){
+      this.ifcTree = list;
+    },
+    updateSelectedElements(selectedElements, changedId){
+      // TODO: remove checkbox selection from rendered list?
+      this.materialsListSelectedElements = selectedElements;
+      var changedElement = this.ifcTree.find(x => x.expressID === changedId);
+      changedElement.selected = !changedElement.selected;
+    },
     createWp(){
       this.show = true;
       // TODO: open modal and create WP.
     },
     elementSelect(element){
-      // TODO: change selection color in viewer
-      if (this.selectedItems.includes(element)) {
+      if (this.materialsListSelectedElements.includes(element)) {
         console.log('element unselected');
-        this.selectedItems.splice(this.selectedItems.indexOf(element))
+        this.materialsListSelectedElements = this.materialsListSelectedElements.filter(e => e !== element);
+        element.selected = false;
       }
       else {
         console.log('element selected');
-        this.selectedItems.push(element);
+        this.materialsListSelectedElements.push(element);
+        element.selected = true;
       }
+
+      this.$emit('listElementsSelectionChange', this.materialsListSelectedElements);
     },
     closeModal(){
       this.show = false;

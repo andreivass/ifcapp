@@ -14,13 +14,17 @@
             </div>
             <div class="col-10">
                 <Viewer 
-                :ifcTree="ifcTree" 
-                @ifc-Tree-Loaded="updateIfcTree" 
-                :selectedElements="selectedElements" 
+                ref="viewer"
                 :ifcFileName="ifcFileName" 
-                @save-Ifc-Name="saveIfcName" 
-                @set-Ifc-Status-Ready="setIfcStatusReady"/>
-                <ListOfIfcElements :ifcTree="ifcTree" :ifcModelReady="ifcModelReady" @ifc-elements-selected="updateSelectedElements" />
+                @ifcTreeLoaded="updateIfcTree" 
+                @saveIfcName="saveIfcName" 
+                @setIfcStatusReady="setIfcStatusReady"
+                @selectionChange="updateListSelectedElements"/>
+
+                <ListOfIfcElements 
+                ref="elementsSection"
+                :ifcModelReady="ifcModelReady" 
+                @listElementsSelectionChange="updateViewerSelectedElements" />
             </div>
         </div>
     </div>
@@ -44,7 +48,7 @@ export default {
       currentProject: null,
       ifcTree : new Array,
       statusMessage: "",
-      selectedElements : new Array,
+      projectSelectedElements : new Array,
       ifcFileName:'',
       ifcModelReady: false
     };
@@ -55,19 +59,37 @@ export default {
         .then(response => {
           this.currentProject = response.data;
           this.ifcFileName = this.currentProject.ifcFileName;
-          console.log("Project loaded in details", response.data);
+          // console.log("Project loaded in details", response.data);
         })
         .catch(e => {
           console.log(e);
         });
     },
     updateIfcTree(loadedIfcTree) {
-        console.log('project details tree: ', loadedIfcTree);
+        // console.log('project details tree: ', loadedIfcTree);
         this.statusMessage = "Vali IFC elemendid tööpaketi loomiseks."
         this.ifcTree = loadedIfcTree;
+        this.$refs.elementsSection.updateListOfElements(loadedIfcTree);
     },
-    updateSelectedElements(selectedElements){
-        this.selectedElements = selectedElements;
+    updateViewerSelectedElements(selectedElements){
+        // console.log('boobs')
+        this.projectSelectedElements = selectedElements;
+        this.$refs.viewer.updateSelectedItems(this.projectSelectedElements);
+    },
+    updateListSelectedElements(selectedElementId){
+        // selectedElementId is express id of clicked element
+        // TODO: remove from selected items, if there or add over from ifcTree
+        var existing = this.projectSelectedElements.find(x => x.expressID === selectedElementId);
+        if (existing !== null){
+          console.log('remove existing')
+          this.projectSelectedElements = this.projectSelectedElements.filter(x => x.expressID !== selectedElementId)
+        }
+        else{
+          var addedElement = this.ifcTree.find(x => x.expressID === selectedElementId);
+          this.projectSelectedElements.push(addedElement);
+          console.log('didnt find existing')
+        }
+        this.$refs.elementsSection.updateSelectedElements(this.projectSelectedElements, selectedElementId);
     },
     saveIfcName(ifcFileName){
       this.currentProject.ifcFileName = ifcFileName;

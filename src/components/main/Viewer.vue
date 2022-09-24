@@ -27,8 +27,8 @@ import { Raycaster, Vector2, MeshLambertMaterial } from 'three'
 
 export default {
     name: 'Viewer',
-    props: ['ifcTree', 'selectedElements', 'ifcFileName'],
-    emits: ['ifc-Tree-Loaded', 'save-Ifc-Name'],
+    props: ['ifcTree', 'ifcFileName'],
+    emits: ['ifcTreeLoaded', 'saveIfcName', 'setIfcStatusReady', 'selectionChange'],
     data() {
         return {
             entityData: '',
@@ -37,7 +37,14 @@ export default {
             ifcFileNameSaved: false,
             updatedIfcFileName: '',
             warningMessage: '',
-            savedFileLoaded: false
+            savedFileLoaded: false,
+            viewerSelectedElementIds: new Array,
+            higlihgtingMaterial: new MeshLambertMaterial({
+                transparent: true,
+                opacity: 0.6,
+                color: 0xff88ff,
+                depthTest: false
+            })
         }
     },
     methods: {
@@ -72,41 +79,39 @@ export default {
             if (this.found) {
                 let ifc = this.IFCManager;
                 let modelId = this.found.object.modelID;
-
                 this.index = this.found.faceIndex;
                 this.geometry = this.found.object.geometry;
-                console.log('geometry: ', this.geometry);
                 this.id = ifc.scene.ifcModel.getExpressId(this.geometry, this.index);
                 this.entityData = this.id;
 
-                let props = await ifc.ifcLoader.ifcManager.getItemProperties(modelId, this.id);
-                console.log('selected element props: ', JSON.stringify(props, null, 2))
-
-                var elementIds = [this.id];
-                this.highlightElements(modelId, ifc, elementIds)
+                // let props = await ifc.ifcLoader.ifcManager.getItemProperties(modelId, this.id);
+                // console.log('selected element props: ', JSON.stringify(props, null, 2))
+                if (this.viewerSelectedElementIds.includes(this.id)) {
+                    this.viewerSelectedElementIds = this.viewerSelectedElementIds.filter(item => item !== this.id);
+                    // this.viewerSelectedElementIds.splice(this.viewerSelectedElementIds.indexOf(this.id));
+                    this.selected = false;
+                }
+                else {
+                    this.viewerSelectedElementIds.push(this.id);
+                    this.selected = true;
+                }
+                // var elementIds = [this.id];
+                // this.viewerSelectedElementIds.push(this.id);
+                this.highlightElements(modelId, ifc, this.viewerSelectedElementIds)
+                this.$emit('selectionChange', this.id)
             }
         },
         highlightElements(modelId, ifcManager, elementIds){
             console.log('highlight', elementIds);
             const ifc = ifcManager.ifcLoader.ifcManager;
-            const preselectMat = new MeshLambertMaterial({
-                transparent: true,
-                opacity: 0.6,
-                color: 0xff88ff,
-                depthTest: false
-            });
 
             ifc.createSubset({
                     modelID: modelId,
                     ids: elementIds,
-                    material: preselectMat,
+                    material: this.higlihgtingMaterial,
                     scene: ifcManager.scene,
                     removePrevious: true
-                });
-                
-            // TODO: remove selection color
-            // need to store material
-            // ifc.removeSubset(modelId, preselectMat);
+                });           
         },
         setupPick(component) {
             component.threeCanvas = document.getElementById('viewer')
@@ -114,12 +119,12 @@ export default {
         },
         async loadIfcData() {
             let ifcProject = await this.IFCManager.ifcLoader.ifcManager.getSpatialStructure(this.IFCManager.scene.ifcModel.modelID);
-            console.log('viewer tree: ', ifcProject);
+            // console.log('viewer tree: ', ifcProject);
             let elementArray = new Array;
             
             await this.parseTree(ifcProject, elementArray);
 
-            this.$emit('ifc-Tree-Loaded', elementArray)
+            this.$emit('ifcTreeLoaded', elementArray)
 
             this.dataLoaded = true;
 
@@ -167,11 +172,29 @@ export default {
             this.updatedIfcFileName = ifcName;
         },
         saveIfcName() {
-            this.$emit('save-Ifc-Name', this.updatedIfcFileName)
+            this.$emit('saveIfcName', this.updatedIfcFileName)
             this.savedFileLoaded = true;
         },
         setIfcStatusReady(){
-            this.$emit('set-Ifc-Status-Ready');
+            this.$emit('setIfcStatusReady');
+        },
+        updateSelectedItems(selectedElements){
+            if (selectedElements.length > 0){
+                console.log('add highlited element in viewer');
+                var elementIds = new Array;
+                selectedElements.forEach( e => {
+                    elementIds.push(e.expressID)
+                });
+
+                // var elementIds = [selectedElements[0].expressID];
+                this.highlightElements(0, this.IFCManager, elementIds);
+            }
+            else {
+                console.log('clear higlights')
+                this.IFCManager.ifcLoader.ifcManager.removeSubset(0, this.higlihgtingMaterial);
+            }
+            
+            this.viewerSelectedElementIds = elementIds;
         }
     },
     mounted() {
@@ -203,28 +226,11 @@ export default {
                         self.savedFileLoaded = true;
                     }
                 } else {
-                    self.warningMessage = 'Vallitud vale IFC fail , vali: ' + self.ifcFileName;
+                    self.warningMessage = 'Valitud vale IFC fail , vali: ' + self.ifcFileName;
                 }
             },
             false
         );      
-    },
-    watch: {
-        async selectedElements(newVal) {
-            // TODO: somehow highliht selected items
-            // console.log("new selected items value: ", newVal);
-            console.log("selected items change in viewer comp")
-            if (newVal.length > 0){
-                // console.log(this.IFCManager);
-                this.highlightElements(0, this.IFCManager, 59553)
-                //console.log(newVal[0].object.modelId);
-                // await this.IFCManager.scene.ifcModel.hideAllItems(0);
-                await this.IFCManager.ifcLoader.ifcManager.hideItems(59753);
-            } else {
-                console.log("Empty list")
-                // await self.IFCManager.ifcLoader.showAllItems();
-            }
-        }
     }
 }
 </script>
