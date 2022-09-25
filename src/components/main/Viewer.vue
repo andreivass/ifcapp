@@ -27,11 +27,10 @@ import { Raycaster, Vector2, MeshLambertMaterial } from 'three'
 
 export default {
     name: 'Viewer',
-    props: ['ifcTree', 'ifcFileName'],
-    emits: ['ifcTreeLoaded', 'saveIfcName', 'setIfcStatusReady', 'selectionChange'],
+    props: ['ifcFileName'],
+    emits: ['ifcElementsArrayLoaded', 'saveIfcName', 'setIfcStatusReady', 'selectionChange'],
     data() {
         return {
-            entityData: '',
             dataLoaded: false,
             fileLoaded: false,
             ifcFileNameSaved: false,
@@ -49,15 +48,20 @@ export default {
     },
     methods: {
         onLoaded() {
-            this.addPicking()
-            this.setupPick(this)
             this.dataLoaded = false
         },
+        // Enable click picking
+        enablePicking() {
+            this.addPicking()
+            this.setupPick(this)
+        },
+        // IFC.js framework loading click picking
         addPicking() {
             this.raycaster = new Raycaster()
             this.raycaster.firstHitOnly = true
             this.mouse = new Vector2()
         },
+        // IFC.js framework click picking
         cast(event) {
             this.bounds = this.threeCanvas.getBoundingClientRect()
             this.x1 = event.clientX - this.bounds.left
@@ -73,6 +77,7 @@ export default {
 
             return this.raycaster.intersectObjects(this.IFCManager.scene.ifcModels)
         },
+        // IFC.js framework click picking
         async pick(event) {
             // Creates subset material
             this.found = this.cast(event)[0]
@@ -82,27 +87,23 @@ export default {
                 this.index = this.found.faceIndex;
                 this.geometry = this.found.object.geometry;
                 this.id = ifc.scene.ifcModel.getExpressId(this.geometry, this.index);
-                this.entityData = this.id;
-
-                // let props = await ifc.ifcLoader.ifcManager.getItemProperties(modelId, this.id);
-                // console.log('selected element props: ', JSON.stringify(props, null, 2))
+                
+                // Syncing viewer selection with ListOfIfcElements
                 if (this.viewerSelectedElementIds.includes(this.id)) {
                     this.viewerSelectedElementIds = this.viewerSelectedElementIds.filter(item => item !== this.id);
-                    // this.viewerSelectedElementIds.splice(this.viewerSelectedElementIds.indexOf(this.id));
                     this.selected = false;
                 }
                 else {
                     this.viewerSelectedElementIds.push(this.id);
                     this.selected = true;
                 }
-                // var elementIds = [this.id];
-                // this.viewerSelectedElementIds.push(this.id);
+
                 this.highlightElements(modelId, ifc, this.viewerSelectedElementIds)
                 this.$emit('selectionChange', this.id)
             }
         },
+        // Highlight selected elements
         highlightElements(modelId, ifcManager, elementIds){
-            console.log('highlight', elementIds);
             const ifc = ifcManager.ifcLoader.ifcManager;
 
             ifc.createSubset({
@@ -113,18 +114,19 @@ export default {
                     removePrevious: true
                 });           
         },
+        // IFC.js framework loading click picking
         setupPick(component) {
             component.threeCanvas = document.getElementById('viewer')
             component.threeCanvas.ondblclick = component.pick
         },
+        // Get elements data from IFC model
         async loadIfcData() {
             let ifcProject = await this.IFCManager.ifcLoader.ifcManager.getSpatialStructure(this.IFCManager.scene.ifcModel.modelID);
-            // console.log('viewer tree: ', ifcProject);
             let elementArray = new Array;
             
             await this.parseTree(ifcProject, elementArray);
 
-            this.$emit('ifcTreeLoaded', elementArray)
+            this.$emit('ifcElementsArrayLoaded', elementArray);
 
             this.dataLoaded = true;
 
@@ -132,10 +134,9 @@ export default {
                 this.setIfcStatusReady();
             }
         },
+        // Modify IFC data to a more usable form
         async parseTree(ifcNode, buidingArray, storeyName){
-            //console.log("ifcManager: ", this.IFCManager);
             if (ifcNode.children.length === 0) {
-
                 return buidingArray;
             } else {
                 for (let i = 0; i < ifcNode.children.length; i++) {
@@ -165,32 +166,34 @@ export default {
                 }
             }
         },
+        // Reload page
         reloadPage() {
             window.location.reload();
         },
+        // Set name of IFC file
         setIfcName(ifcName){
             this.updatedIfcFileName = ifcName;
         },
+        // Save name of IFC file
         saveIfcName() {
             this.$emit('saveIfcName', this.updatedIfcFileName)
             this.savedFileLoaded = true;
         },
+        // Set app status to IFC ready
         setIfcStatusReady(){
             this.$emit('setIfcStatusReady');
+            this.enablePicking();
         },
+        // Update selection changes coming in from ListOfIfcElements component
         updateSelectedItems(selectedElements){
             if (selectedElements.length > 0){
-                console.log('add highlited element in viewer');
                 var elementIds = new Array;
                 selectedElements.forEach( e => {
                     elementIds.push(e.expressID)
                 });
-
-                // var elementIds = [selectedElements[0].expressID];
                 this.highlightElements(0, this.IFCManager, elementIds);
             }
             else {
-                console.log('clear higlights')
                 this.IFCManager.ifcLoader.ifcManager.removeSubset(0, this.higlihgtingMaterial);
             }
             
@@ -207,6 +210,7 @@ export default {
 
         let input = document.getElementById('file-input');
 
+        // File selection
         input.addEventListener(
             'change',
              async function(changed) {
@@ -248,7 +252,6 @@ export default {
 }
 
 #file-input {
-    /* position: absolute; */
     left: 0%;
     top: 0%;
     z-index: 100;

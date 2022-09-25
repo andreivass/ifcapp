@@ -16,13 +16,13 @@
                 <Viewer 
                 ref="viewer"
                 :ifcFileName="ifcFileName" 
-                @ifcTreeLoaded="updateIfcTree" 
+                @ifcElementsArrayLoaded="updateIfcElementsArray" 
                 @saveIfcName="saveIfcName" 
                 @setIfcStatusReady="setIfcStatusReady"
                 @selectionChange="updateListSelectedElements"/>
 
                 <ListOfIfcElements 
-                ref="elementsSection"
+                ref="listOfIfcElements"
                 :ifcModelReady="ifcModelReady" 
                 @listElementsSelectionChange="updateViewerSelectedElements" />
             </div>
@@ -46,7 +46,7 @@ export default {
   data() {
     return {
       currentProject: null,
-      ifcTree : new Array,
+      ifcElementsArray : new Array,
       statusMessage: "",
       projectSelectedElements : new Array,
       ifcFileName:'',
@@ -54,47 +54,46 @@ export default {
     };
   },
   methods: {
+    // Get project
     getProject(id) {
       ProjectDataService.get(id)
         .then(response => {
           this.currentProject = response.data;
           this.ifcFileName = this.currentProject.ifcFileName;
-          // console.log("Project loaded in details", response.data);
         })
         .catch(e => {
           console.log(e);
         });
     },
-    updateIfcTree(loadedIfcTree) {
-        // console.log('project details tree: ', loadedIfcTree);
+    // Update IFC elements array on change from Viewer
+    updateIfcElementsArray(loadedIfcElementsArray) {
         this.statusMessage = "Vali IFC elemendid tööpaketi loomiseks."
-        this.ifcTree = loadedIfcTree;
-        this.$refs.elementsSection.updateListOfElements(loadedIfcTree);
+        this.ifcElementsArray = loadedIfcElementsArray;
+        this.$refs.listOfIfcElements.updateListOfElements(loadedIfcElementsArray);
     },
+    // Update selected elements on change from ListOfIfcElements
     updateViewerSelectedElements(selectedElements){
-        // console.log('boobs')
         this.projectSelectedElements = selectedElements;
         this.$refs.viewer.updateSelectedItems(this.projectSelectedElements);
     },
+    // Update selected elements on change from Viewer
     updateListSelectedElements(selectedElementId){
-        // selectedElementId is express id of clicked element
-        // TODO: remove from selected items, if there or add over from ifcTree
         var existing = this.projectSelectedElements.find(x => x.expressID === selectedElementId);
         if (existing !== null){
-          console.log('remove existing')
           this.projectSelectedElements = this.projectSelectedElements.filter(x => x.expressID !== selectedElementId)
         }
         else{
-          var addedElement = this.ifcTree.find(x => x.expressID === selectedElementId);
+          var addedElement = this.ifcElementsArray.find(x => x.expressID === selectedElementId);
           this.projectSelectedElements.push(addedElement);
-          console.log('didnt find existing')
         }
-        this.$refs.elementsSection.updateSelectedElements(this.projectSelectedElements, selectedElementId);
+        this.$refs.listOfIfcElements.updateSelectedElements(this.projectSelectedElements, selectedElementId);
     },
+    // Bind and save project with IFC file name 
     saveIfcName(ifcFileName){
       this.currentProject.ifcFileName = ifcFileName;
       this.updateProject();
     },
+    // Save updated project
     updateProject() {
       ProjectDataService.update(this.currentProject.projectId, this.currentProject)
         .then(response => {
@@ -107,6 +106,7 @@ export default {
       
         this.ifcModelReady = true;
     },
+    // Set app status as IFC model ready
     setIfcStatusReady(){
       this.ifcModelReady = true;
     }

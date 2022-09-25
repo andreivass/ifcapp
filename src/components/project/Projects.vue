@@ -61,7 +61,8 @@ export default {
     };
   },
   methods: {
-    retrieveProjects() {
+    // Get list of projects
+    getProjects() {
       ProjectDataService.getAll()
         .then(response => {
           this.projects = response.data;
@@ -71,18 +72,14 @@ export default {
           console.log(e);
         });
     },
-    refreshList() {
-      this.retrieveTutorials();
-      this.currentProject = null;
-      this.currentIndex = -1;
-    },
+    // Set selected project as active
     setActiveProject(project, index) {
       this.currentProject = project;
       this.currentIndex = project ? index : -1;
     }
   },
   mounted() {
-    this.retrieveProjects();
+    this.getProjects();
   }
 };
 </script>

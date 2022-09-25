@@ -51,6 +51,7 @@ export default {
     };
   },
   methods: {
+    // Get project
     getProject(id) {
       ProjectDataService.get(id)
         .then(response => {
@@ -61,17 +62,21 @@ export default {
           console.log(e);
         });
     },
+    // Save updated project
     updateProject() {
       ProjectDataService.update(this.currentProject.projectId, this.currentProject)
         .then(response => {
           console.log(response.data);
           this.message = 'Projekt salvestatud!';
+          this.$router.push({ name: "projects" });
         })
         .catch(e => {
           console.log(e);
         });
     },
+    // Delete project
     deleteProject() {
+      // TODO: add confirmation for delete
       ProjectDataService.delete(this.currentProject.projectId)
         .then(response => {
           console.log(response.data);

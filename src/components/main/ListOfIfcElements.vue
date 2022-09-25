@@ -5,26 +5,20 @@
     <table class="table table-hover" id="materials-table">
         <thead>
             <tr>
-                <th scope="col">Select</th>
-                <th scope="col">Row nr</th>
-                <th scope="col">Storey</th>
-                <!-- <th scope="col">Guid</th>
-                <th scope="col">Id</th> -->
-                <th scope="col">IFC Type</th>
-                <th scope="col">Name</th>
-                <th scope="col">ObjectType</th>
+                <th scope="col">Vali</th>
+                <th scope="col">Jrk nr</th>
+                <th scope="col">Korrus</th>
+                <th scope="col">IFC Tüüp</th>
+                <th scope="col">Nimi</th>
             </tr>
         </thead>
-        <tbody v-if="ifcTree.length > 0">
-            <tr v-for="(element, index) in ifcTree" :key=element.expressId>
+        <tbody v-if="ifcElementsArray.length > 0">
+            <tr v-for="(element, index) in ifcElementsArray" :key=element.expressId>
                 <td><input type="checkbox" id="checkbox" v-model="element.selected" @change="elementSelect(element)"></td>
                 <td>{{ index + 1 }}</td>
                 <td>{{ element.buildingStorey }}</td>
-                <!-- <td>{{ element.GlobalId.value }}</td>
-                <td>{{ element.expressID }}</td> -->
                 <td>{{ element.ifcType }}</td>
                 <td>{{ element.Name?.value }}</td>
-                <td>{{ element.ObjectType?.value }}</td>
             </tr>
         </tbody>
         <tbody v-else>
@@ -35,7 +29,7 @@
     </table>
 
   <Transition name="modal">
-    <div v-if="show" class="modal-mask">
+    <div v-if="showModal" class="modal-mask">
       <div class="modal-wrapper">
         <div class="modal-container">
           <div class="modal-header">
@@ -75,55 +69,42 @@ export default {
   emits: ['listElementsSelectionChange', 'asd'],
   data() {
     return {
-        treeData: {},
-        showTreeTable: false,
-        ifcTree: new Array,
+        ifcElementsArray: new Array,
         materialsListSelectedElements: new Array,
-        show: false
+        showModal: false
     }
   },
-  // watch: {
-  //     ifcTree: {
-  //         setImmediate: true,
-  //         handler() {
-  //             console.log('Tree value changed');
-  //             // if (!this.showTreeTable) {
-  //             //   this.prepareIfcTreeData();
-  //             // }
-              
-  //         }
-  //     }
-  // },
   methods: {
-    updateListOfElements(list){
-      this.ifcTree = list;
+    // Update elements array on change from ProjectDetails
+    updateListOfElements(elementsArray){
+      this.ifcElementsArray = elementsArray;
     },
+    // Update selected elements array on change from ProjectDetails
     updateSelectedElements(selectedElements, changedId){
-      // TODO: remove checkbox selection from rendered list?
       this.materialsListSelectedElements = selectedElements;
-      var changedElement = this.ifcTree.find(x => x.expressID === changedId);
+      var changedElement = this.ifcElementsArray.find(x => x.expressID === changedId);
       changedElement.selected = !changedElement.selected;
     },
+    // Create new work package
     createWp(){
-      this.show = true;
+      this.showModal = true;
       // TODO: open modal and create WP.
     },
+    // Close WP modal
+    closeModal(){
+      this.showModal = false;
+    },
+    // Add IFC element to selected elements
     elementSelect(element){
       if (this.materialsListSelectedElements.includes(element)) {
-        console.log('element unselected');
         this.materialsListSelectedElements = this.materialsListSelectedElements.filter(e => e !== element);
         element.selected = false;
       }
       else {
-        console.log('element selected');
         this.materialsListSelectedElements.push(element);
         element.selected = true;
       }
-
       this.$emit('listElementsSelectionChange', this.materialsListSelectedElements);
-    },
-    closeModal(){
-      this.show = false;
     }
   }
 }
@@ -132,6 +113,8 @@ export default {
 <style>
 #materials-table {
     min-height: 200px;
+    width: 100% !important;
+    height: auto !important;
 }
 
 .modal-mask {
