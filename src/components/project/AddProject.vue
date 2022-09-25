@@ -56,6 +56,7 @@ export default {
   },
   methods: {
     // Save new project
+    // TODO: add validation
     saveProject() {
       var data = {
         id: this.project.id,

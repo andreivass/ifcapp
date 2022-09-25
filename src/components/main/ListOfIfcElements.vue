@@ -1,6 +1,6 @@
 <template>
   <div v-if="ifcModelReady == true">
-    <button type="button" @click.prevent="createWp()">Uus tööpakett</button>
+    <button type="button" @click.prevent="openWpModal()">Uus tööpakett</button>
   </div>
     <table class="table table-hover" id="materials-table">
         <thead>
@@ -33,23 +33,53 @@
       <div class="modal-wrapper">
         <div class="modal-container">
           <div class="modal-header">
-            <slot name="header">default header</slot>
-            <button
-                class="modal-default-button"
-                @click="closeModal"
-              >X</button>
+            <slot name="header">{{ this.wpModalHeader }}</slot>
+            <button class="btn btn-secondary mt-2"
+                @click="closeWpModal">
+                X
+              </button>
           </div>
 
           <div class="modal-body">
-            <slot name="body">default body</slot>
+            <slot name="body">
+              <table class="table table-sm table-hover" id="materials-table">
+                  <thead>
+                      <tr>
+                          <th scope="col"></th>
+                          <th scope="col">Lvl1</th>
+                          <th scope="col">Lvl2</th>
+                          <th scope="col">Nimetus</th>
+                          <th scope="col">Kirjeldus</th>
+                      </tr>
+                  </thead>
+                  <tbody v-if="classificators.length > 0">
+                      <tr v-for="(classificator) in classificators" :key=classificator.cciEePpId>
+                          <td><input type="checkbox" id="modal-checkbox" v-model="classificator.selected" @change="classificatorSelect(classificator)"></td>
+                          <td>{{ classificator.level1 }}</td>
+                          <td>{{ classificator.level2 }}</td>
+                          <td>{{ classificator.termEe }}</td>
+                          <td>{{ classificator.definitionEe }}</td>
+                      </tr>
+                  </tbody>
+                  <tbody v-else>
+                      <tr>
+                          Andmed ei ole veel sisse laetud.
+                      </tr>
+                  </tbody>
+              </table>
+            </slot>
           </div>
 
           <div class="modal-footer">
             <slot name="footer">
-              default footer
-              <button
-                class="modal-default-button"
-              >Save</button>
+              <button class="btn btn-secondary mt-2"
+                @click="closeWpModal">
+                Loobu
+              </button>
+              <button class="btn btn-success mt-2"
+                @click="saveWorkPackage">
+                Salvesta
+              </button>
             </slot>
           </div>
         </div>
@@ -60,6 +90,7 @@
 </template>
 
 <script>
+import ClassificatorDataService from "../../services/classificatorDataService"
 
 export default {
   name: 'ListOfIfcElements',
@@ -71,10 +102,13 @@ export default {
     return {
         ifcElementsArray: new Array,
         materialsListSelectedElements: new Array,
-        showModal: false
+        showModal: false,
+        wpModalHeader: '',
+        classificators: []
     }
   },
   methods: {
+    // Section IFC elements
     // Update elements array on change from ProjectDetails
     updateListOfElements(elementsArray){
       this.ifcElementsArray = elementsArray;
@@ -84,15 +118,6 @@ export default {
       this.materialsListSelectedElements = selectedElements;
       var changedElement = this.ifcElementsArray.find(x => x.expressID === changedId);
       changedElement.selected = !changedElement.selected;
-    },
-    // Create new work package
-    createWp(){
-      this.showModal = true;
-      // TODO: open modal and create WP.
-    },
-    // Close WP modal
-    closeModal(){
-      this.showModal = false;
     },
     // Add IFC element to selected elements
     elementSelect(element){
@@ -105,7 +130,53 @@ export default {
         element.selected = true;
       }
       this.$emit('listElementsSelectionChange', this.materialsListSelectedElements);
+    },
+    // Section Work packages
+    // Open work package modal
+    openWpModal(){
+      if (this.classificators.length === 0){
+        this.getClassificators();
+      }
+      this.wpModalHeader = 'Vali elementidele klassifikaator ja loo uus tööpakett'
+      this.showModal = true;
+      // TODO: open modal and create WP.
+    },
+    // Close WP modal
+    closeWpModal(){
+      this.showModal = false;
+    },
+    // Save WP
+    saveWorkPackage(){
+      var classificator = this.classificators.find(x => x.selected === true);
+      console.log(classificator)
+      // TODO: bind classificator with selected elements and create WP
+      // TODO: API side update logic to also save elements, if they aren't saved yet
+      this.closeWpModal();
+    },
+    // Get list of classificators
+    getClassificators() {
+      ClassificatorDataService.getAll()
+        .then(response => {
+          this.classificators = response.data;
+          this.classificators.forEach(x => x.selected = false);
+          console.log(response.data);
+        })
+        .catch(e => {
+          console.log(e);
+        });
+    },
+    // Select classificator for WP
+    classificatorSelect(classificator){
+      this.classificators.forEach(x => x.selected = false);
+      classificator.selected = true;
+    },
+    // Load all existing work packages for this project
+    loadExistingWorkPackages(){
+      console.log('TODO: Get WPs and highlight IFC elements already in a WP')
     }
+  },
+  mounted() {
+    this.loadExistingWorkPackages();
   }
 }
 </script>
@@ -135,22 +206,28 @@ export default {
 }
 
 .modal-container {
-  width: 300px;
+  width: 800px;
   margin: 0px auto;
-  padding: 20px 30px;
+  padding: 10px 10px;
   background-color: #fff;
   border-radius: 2px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);
   transition: all 0.3s ease;
 }
 
+.modal-body {
+  max-height: 700px;
+  overflow-y: auto;
+}
+
 .modal-header h3 {
+  position: absolute;
   margin-top: 0;
   color: #42b983;
 }
 
 .modal-body {
-  margin: 20px 0;
+  margin: 0 0;
 }
 
 .modal-default-button {

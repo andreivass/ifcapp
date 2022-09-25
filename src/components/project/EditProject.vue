@@ -5,30 +5,25 @@
       <div class="form-group">
         <label for="name">Nimi</label>
         <input type="text" class="form-control" id="name"
-          v-model="currentProject.name"
-        />
+          v-model="currentProject.name"/>
       </div>
       <div class="form-group">
         <label for="description">Kirjeldus</label>
         <input type="text" class="form-control" id="description"
-          v-model="currentProject.description"
-        />
+          v-model="currentProject.description"/>
       </div>
       <div class="form-group">
         <label for="description">Kood</label>
         <input type="text" class="form-control" id="code"
-          v-model="currentProject.code"
-        />
+          v-model="currentProject.code"/>
       </div>
     </form>
     <button class="btn btn-danger mt-2"
-      @click="deleteProject"
-    >
+      @click="deleteProject">
       Kustuta
     </button>
     <button type="submit" class="btn btn-success mt-2"
-      @click="updateProject"
-    >
+      @click="updateProject">
       Salvesta
     </button>
     <p>{{ message }}</p>
@@ -63,6 +58,7 @@ export default {
         });
     },
     // Save updated project
+    // TODO: add validation
     updateProject() {
       ProjectDataService.update(this.currentProject.projectId, this.currentProject)
         .then(response => {
