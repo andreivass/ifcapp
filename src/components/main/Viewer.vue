@@ -186,8 +186,8 @@ export default {
         },
         // Update selection changes coming in from ListOfIfcElements component
         updateSelectedItems(selectedElements){
+            var elementIds = new Array;
             if (selectedElements.length > 0){
-                var elementIds = new Array;
                 selectedElements.forEach( e => {
                     elementIds.push(e.expressID)
                 });

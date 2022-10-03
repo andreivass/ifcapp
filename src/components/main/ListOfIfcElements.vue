@@ -1,5 +1,5 @@
 <template>
-  <div v-if="ifcModelReady == true">
+  <div v-if="ifcModelReady == true && workPackageViewEnabled == false">
     <button type="button" @click.prevent="openWpModal()">Uus tööpakett</button>
   </div>
     <table class="table table-hover" id="materials-table">
@@ -105,9 +105,9 @@ import WorkPackageDataService from "../../services/workPackageDataService";
 export default {
   name: 'ListOfIfcElements',
   props: [
-      'ifcModelReady', 'projectId'
+      'ifcModelReady', 'projectId', 'workPackageViewEnabled'
   ],
-  emits: ['listElementsSelectionChange', 'asd'],
+  emits: ['listElementsSelectionChange', 'workPackagesUpdated'],
   data() {
     return {
         ifcElementsArray: new Array,
@@ -126,6 +126,11 @@ export default {
   },
   methods: {
     // Section IFC elements
+    clearSelectedElements(){
+      this.materialsListSelectedElements = [];
+      this.ifcElementsArray.forEach(x => x.selected = false);
+      this.$emit('listElementsSelectionChange', this.materialsListSelectedElements);
+    },
     // Update elements array on change from ProjectDetails
     updateListOfElements(elementsArray){
       this.ifcElementsArray = elementsArray;
@@ -181,7 +186,8 @@ export default {
         description: 'test descr',
         code: 'test code',
         projectId: this.projectId,
-        modelElements: []
+        modelElements: [],
+        selected: false
       };
       
       this.materialsListSelectedElements.forEach(x => workPackage.modelElements.push(
@@ -199,7 +205,8 @@ export default {
         .then(response => {
           console.log('wp save api response: ', response.data);
           this.submitted = true;
-          this.$router.push('projects');
+          workPackage.workPackageId = response.data.workPackageId;
+          this.workPackages.push(workPackage);
         })
         .catch(e => {
           console.log(e);
@@ -207,6 +214,7 @@ export default {
 
       // update element exist in wp
       this.materialsListSelectedElements.forEach(x => x.existsInWorkpackage = true);
+      this.$emit('workPackagesUpdated', this.workPackages);
       
       this.closeWpModal();
     },
@@ -235,13 +243,15 @@ export default {
           this.workPackages.forEach(wp => {
             if (wp.modelElements != null){
               wp.modelElements.forEach(element => {
-              var elementInArray = this.ifcElementsArray.find(x => x.expressID == element.expressId);
-              if (elementInArray != null){
-                elementInArray.existsInWorkpackage = true;
-              }
+                var elementInArray = this.ifcElementsArray.find(x => x.expressID == element.expressId);
+                if (elementInArray != null){
+                  elementInArray.existsInWorkpackage = true;
+                }
               });
             }
+            wp.selected = false;
           });
+          this.$emit('workPackagesUpdated', this.workPackages);
         })
         .catch(e => {
           console.log(e);

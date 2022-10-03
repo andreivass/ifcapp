@@ -10,7 +10,10 @@
   <div v-if="currentProject" class="container-xxl" id="app-container">
         <div class="row row-cols-auto">
             <div class="col-2">
-                <NavigationMenu />
+                <NavigationMenu 
+                @changeViewToIfc="changeViewToIfcList"
+                @changeViewToWp="changeViewToWpList"
+                />
             </div>
             <div class="col-10">
                 <Viewer 
@@ -19,13 +22,25 @@
                 @ifcElementsArrayLoaded="updateIfcElementsArray" 
                 @saveIfcName="saveIfcName" 
                 @setIfcStatusReady="setIfcStatusReady"
-                @selectionChange="updateListSelectedElements"/>
-
-                <ListOfIfcElements 
-                ref="listOfIfcElements"
-                :ifcModelReady="ifcModelReady" 
-                :projectId="this.projectId"
-                @listElementsSelectionChange="updateViewerSelectedElements" />
+                @selectionChange="updateListSelectedElements"
+                />
+                <div v-show="!workPackageViewEnabled">
+                  <ListOfIfcElements
+                  ref="listOfIfcElements"
+                  :ifcModelReady="ifcModelReady" 
+                  :projectId="this.projectId"
+                  :workPackageViewEnabled="workPackageViewEnabled"
+                  @listElementsSelectionChange="updateViewerSelectedElements" 
+                  @workPackagesUpdated="workPackagesUpdatedInIfcList"
+                  />
+                </div>
+                <div v-show="workPackageViewEnabled">
+                  <ListOfWorkPackages 
+                  ref="listOfWorkPackages"
+                  @listElementsSelectionChange="updateViewerSelectedElements" 
+                  :workPackages="this.workPackages"
+                  />
+                </div>
             </div>
         </div>
     </div>
@@ -36,14 +51,16 @@ import ProjectDataService from "../../services/projectDataService";
 import NavigationMenu from '../main/NavigationMenu.vue'
 import Viewer from '../main/Viewer.vue'
 import ListOfIfcElements from '../main/ListOfIfcElements.vue'
+import ListOfWorkPackages from "../main/ListOfWorkPackages.vue";
 
 export default {
   name: "project-details",
   components: {
     NavigationMenu,
     Viewer,
-    ListOfIfcElements
-  },
+    ListOfIfcElements,
+    ListOfWorkPackages
+},
   data() {
     return {
       currentProject: null,
@@ -52,7 +69,9 @@ export default {
       projectSelectedElements : new Array,
       ifcFileName:'',
       ifcModelReady: false,
-      projectId: 0
+      projectId: 0,
+      workPackageViewEnabled: false,
+      workPackages: []
     };
   },
   methods: {
@@ -111,6 +130,22 @@ export default {
     // Set app status as IFC model ready
     setIfcStatusReady(){
       this.ifcModelReady = true;
+    },
+    // Change view to IFC list
+    changeViewToIfcList(){
+      this.workPackageViewEnabled = false;
+      this.projectSelectedElements = [];
+      this.$refs.listOfIfcElements.clearSelectedElements();
+    },
+    // Change view to WorkPackage list
+    changeViewToWpList(){
+      this.workPackageViewEnabled = true;
+      this.projectSelectedElements = [];
+      this.$refs.listOfWorkPackages.clearSelectedElements();
+    },
+    // Update work packages on change from IFC list
+    workPackagesUpdatedInIfcList(workPackages){
+      this.workPackages = workPackages;
     }
   },
   mounted() {
