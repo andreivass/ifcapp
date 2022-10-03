@@ -15,7 +15,10 @@
         <tbody v-if="ifcElementsArray.length > 0">
             <tr v-for="(element, index) in ifcElementsArray" :key=element.expressId>
                 <td><input type="checkbox" id="checkbox" v-model="element.selected" @change="elementSelect(element)"></td>
-                <td>{{ index + 1 }}</td>
+                
+                <td v-if="element.existsInWorkpackage === true" class="table-info">{{ index + 1 }}</td>
+                <td v-else>{{ index + 1 }}</td>
+
                 <td>{{ element.buildingStorey }}</td>
                 <td>{{ element.ifcType }}</td>
                 <td>{{ element.Name?.value }}</td>
@@ -33,7 +36,7 @@
       <div class="modal-wrapper">
         <div class="modal-container">
           <div class="modal-header">
-            <slot name="header">{{ this.wpModalHeader }}</slot>
+            <slot name="header"><h4>{{ this.wpModalHeader }}</h4></slot>
             <button class="btn btn-secondary mt-2"
                 @click="closeWpModal">
                 X
@@ -41,6 +44,9 @@
           </div>
 
           <div class="modal-body">
+            <div v-if="materialsListSelectedElements.length < 1" class="error">
+              Teade: Palun vali vähemalt üks element enne tööpaketi loomist.
+            </div>
             <slot name="body">
               <table class="table table-sm table-hover" id="materials-table">
                   <thead>
@@ -54,7 +60,9 @@
                   </thead>
                   <tbody v-if="classificators.length > 0">
                       <tr v-for="(classificator) in classificators" :key=classificator.cciEePpId>
-                          <td><input type="checkbox" id="modal-checkbox" v-model="classificator.selected" @change="classificatorSelect(classificator)"></td>
+                          <td><input type="checkbox" id="modal-checkbox" 
+                            v-model="classificator.selected" 
+                            @change="classificatorSelect(classificator)"></td>
                           <td>{{ classificator.level1 }}</td>
                           <td>{{ classificator.level2 }}</td>
                           <td>{{ classificator.termEe }}</td>
@@ -77,6 +85,7 @@
                 Loobu
               </button>
               <button class="btn btn-success mt-2"
+                :disabled="modalSaveDisabled"
                 @click="saveWorkPackage">
                 Salvesta
               </button>
@@ -91,11 +100,12 @@
 
 <script>
 import ClassificatorDataService from "../../services/classificatorDataService"
+import WorkPackageDataService from "../../services/workPackageDataService";
 
 export default {
   name: 'ListOfIfcElements',
   props: [
-      'ifcModelReady'
+      'ifcModelReady', 'projectId'
   ],
   emits: ['listElementsSelectionChange', 'asd'],
   data() {
@@ -104,7 +114,14 @@ export default {
         materialsListSelectedElements: new Array,
         showModal: false,
         wpModalHeader: '',
-        classificators: []
+        classificators: [],
+        anyClassificator: false,
+        workPackages: []
+    }
+  },
+  computed: {
+    modalSaveDisabled(){
+      return (this.materialsListSelectedElements.length < 1 || !this.anyClassificator);
     }
   },
   methods: {
@@ -112,6 +129,9 @@ export default {
     // Update elements array on change from ProjectDetails
     updateListOfElements(elementsArray){
       this.ifcElementsArray = elementsArray;
+      if (this.workPackages.length == 0){
+        this.loadExistingWorkPackages()
+      }
     },
     // Update selected elements array on change from ProjectDetails
     updateSelectedElements(selectedElements, changedId){
@@ -144,13 +164,50 @@ export default {
     // Close WP modal
     closeWpModal(){
       this.showModal = false;
+      var classificator = this.classificators.find(x => x.selected === true);
+      if (classificator != null){
+        classificator.selected = false;
+      }
+      this.anyClassificator = false;
     },
     // Save WP
     saveWorkPackage(){
       var classificator = this.classificators.find(x => x.selected === true);
-      console.log(classificator)
-      // TODO: bind classificator with selected elements and create WP
-      // TODO: API side update logic to also save elements, if they aren't saved yet
+
+      var workPackage = {
+        workPackageId: 0,
+        name: 'test',
+        cciEePpId: classificator.cciEePpId,
+        description: 'test descr',
+        code: 'test code',
+        projectId: this.projectId,
+        modelElements: []
+      };
+      
+      this.materialsListSelectedElements.forEach(x => workPackage.modelElements.push(
+        {
+          guid: x.GlobalId.value,
+          expressId: x.expressID,
+          ifcType: x.ifcType,
+          ifcStorey: x.buildingStorey,
+          name: x.Name.value,
+          objectType: x.ObjectType.value
+        }
+      ));
+
+      WorkPackageDataService.create(workPackage)
+        .then(response => {
+          console.log('wp save api response: ', response.data);
+          this.submitted = true;
+          this.$router.push('projects');
+        })
+        .catch(e => {
+          console.log(e);
+        });
+
+      // update element exist in wp
+      this.materialsListSelectedElements.forEach(x => x.existsInWorkpackage = true);
+      
       this.closeWpModal();
     },
     // Get list of classificators
@@ -159,7 +216,6 @@ export default {
         .then(response => {
           this.classificators = response.data;
           this.classificators.forEach(x => x.selected = false);
-          console.log(response.data);
         })
         .catch(e => {
           console.log(e);
@@ -169,19 +225,37 @@ export default {
     classificatorSelect(classificator){
       this.classificators.forEach(x => x.selected = false);
       classificator.selected = true;
+      this.anyClassificator = true;
     },
     // Load all existing work packages for this project
     loadExistingWorkPackages(){
-      console.log('TODO: Get WPs and highlight IFC elements already in a WP')
+      WorkPackageDataService.getByProject(this.projectId)
+        .then(response => {
+          this.workPackages = response.data;
+          this.workPackages.forEach(wp => {
+            if (wp.modelElements != null){
+              wp.modelElements.forEach(element => {
+              var elementInArray = this.ifcElementsArray.find(x => x.expressID == element.expressId);
+              if (elementInArray != null){
+                elementInArray.existsInWorkpackage = true;
+              }
+              });
+            }
+          });
+        })
+        .catch(e => {
+          console.log(e);
+        });
     }
-  },
-  mounted() {
-    this.loadExistingWorkPackages();
   }
 }
 </script>
 
 <style>
+.error {
+  color: red;
+}
+
 #materials-table {
     min-height: 200px;
     width: 100% !important;

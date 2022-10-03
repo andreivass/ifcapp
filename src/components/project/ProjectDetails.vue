@@ -24,6 +24,7 @@
                 <ListOfIfcElements 
                 ref="listOfIfcElements"
                 :ifcModelReady="ifcModelReady" 
+                :projectId="this.projectId"
                 @listElementsSelectionChange="updateViewerSelectedElements" />
             </div>
         </div>
@@ -50,7 +51,8 @@ export default {
       statusMessage: "",
       projectSelectedElements : new Array,
       ifcFileName:'',
-      ifcModelReady: false
+      ifcModelReady: false,
+      projectId: 0
     };
   },
   methods: {
@@ -113,7 +115,8 @@ export default {
   },
   mounted() {
     this.statusMessage = "Vali IFC fail ja lae sisse andmed";
-    this.getProject(this.$route.params.id);
+    this.projectId = this.$route.params.id;
+    this.getProject(this.projectId);
   }
 };
 </script>

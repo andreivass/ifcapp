@@ -6,6 +6,9 @@ class WorkPackageDataService {
   get(id) {
     return http.get(`/workpackages/${id}`);
   }
+  getByProject(id) {
+    return http.get(`/workpackages/byproject/?id=${id}`);
+  }
   create(data) {
     return http.post("/workpackages", data);
   }
