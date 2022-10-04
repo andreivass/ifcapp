@@ -2,16 +2,18 @@
     <section>
         <div class="row viewer">
             <div v-if="dataLoaded == false && fileLoaded == false" class="col-sm">
-                <input type="file" id="file-input"/>
+                <label class="btn btn-primary"> Vali IFC fail
+                    <input type="file" id="file-input" hidden/>
+                </label>
             </div>
             <div v-if="dataLoaded == false && fileLoaded == true && this.ifcFileNameSaved == false" class="col-sm">
-                <button type="button" @click.prevent="reloadPage()">Vali teine IFC fail</button>
+                <button type="button" class="btn btn-primary" @click.prevent="reloadPage()">Vali teine IFC fail</button>
             </div>
             <div v-if="dataLoaded == false && fileLoaded == true" class="col-sm">
-                <button type="button" @click.prevent="loadIfcData">Lae IFC andmed</button>
+                <button type="button" class="btn btn-primary" @click.prevent="loadIfcData">Lae IFC andmed</button>
             </div>
             <div v-if="dataLoaded == true && fileLoaded == true && savedFileLoaded == false" class="col-sm">
-                <button type="button" @click.prevent="saveIfcName">Salvesta IFC fail projektile</button>
+                <button type="button" class="btn btn-primary" @click.prevent="saveIfcName">Salvesta IFC fail projektile</button>
             </div>
             <div v-if="warningMessage.length > 0">
                 {{ warningMessage }}

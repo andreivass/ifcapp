@@ -1,6 +1,6 @@
 <template>
   <div v-if="ifcModelReady == true && workPackageViewEnabled == false">
-    <button type="button" @click.prevent="openWpModal()">Uus tööpakett</button>
+    <button type="button" class="btn btn-primary" @click.prevent="openWpModal()">Uus tööpakett</button>
   </div>
     <table class="table table-hover" id="materials-table">
         <thead>
@@ -48,6 +48,25 @@
               Teade: Palun vali vähemalt üks element enne tööpaketi loomist.
             </div>
             <slot name="body">
+              <form>
+                <div class="form-group">
+                  <label for="name" class="align-left">Nimi</label>
+                  <label v-if="showNameRequiredError" class="error">Nimi on kohustuslik</label>
+                  <input type="text" class="form-control" id="name"
+                    v-model="workPackageFormModel.name"/>
+                </div>
+                <div class="form-group">
+                  <label for="description" class="align-left">Kirjeldus</label>
+                  <input type="text" class="form-control" id="description"
+                    v-model="workPackageFormModel.description"/>
+                </div>
+                <div class="form-group">
+                  <label for="code" class="align-left">Kood</label>
+                  <label v-if="showCodeRequiredError" class="error">Kood on kohustuslik</label>
+                  <input type="text" class="form-control" id="code"
+                    v-model="workPackageFormModel.code"/>
+                </div>
+              </form>
               <table class="table table-sm table-hover" id="materials-table">
                   <thead>
                       <tr>
@@ -116,7 +135,14 @@ export default {
         wpModalHeader: '',
         classificators: [],
         anyClassificator: false,
-        workPackages: []
+        workPackages: [],
+        workPackageFormModel: {
+          name: '',
+          description: '',
+          code: ''
+        },
+        showNameRequiredError: false,
+        showCodeRequiredError: false
     }
   },
   computed: {
@@ -135,7 +161,7 @@ export default {
     updateListOfElements(elementsArray){
       this.ifcElementsArray = elementsArray;
       if (this.workPackages.length == 0){
-        this.loadExistingWorkPackages()
+        this.getExistingWorkPackages()
       }
     },
     // Update selected elements array on change from ProjectDetails
@@ -164,7 +190,6 @@ export default {
       }
       this.wpModalHeader = 'Vali elementidele klassifikaator ja loo uus tööpakett'
       this.showModal = true;
-      // TODO: open modal and create WP.
     },
     // Close WP modal
     closeWpModal(){
@@ -177,46 +202,54 @@ export default {
     },
     // Save WP
     saveWorkPackage(){
-      var classificator = this.classificators.find(x => x.selected === true);
+      if (this.workPackageFormModel.name == '') {
+        this.showNameRequiredError = true;
+      } else if (this.workPackageFormModel.code == ''){
+        this.showNameRequiredError = false;
+        this.showCodeRequiredError = true;
+      } else {
+        var classificator = this.classificators.find(x => x.selected === true);
 
-      var workPackage = {
-        workPackageId: 0,
-        name: 'test',
-        cciEePpId: classificator.cciEePpId,
-        description: 'test descr',
-        code: 'test code',
-        projectId: this.projectId,
-        modelElements: [],
-        selected: false
-      };
-      
-      this.materialsListSelectedElements.forEach(x => workPackage.modelElements.push(
-        {
-          guid: x.GlobalId.value,
-          expressId: x.expressID,
-          ifcType: x.ifcType,
-          ifcStorey: x.buildingStorey,
-          name: x.Name.value,
-          objectType: x.ObjectType.value
-        }
-      ));
+        var workPackage = {
+          workPackageId: 0,
+          name: this.workPackageFormModel.name,
+          cciEePpId: classificator.cciEePpId,
+          description: this.workPackageFormModel.description,
+          code: this.workPackageFormModel.code,
+          projectId: this.projectId,
+          modelElements: [],
+          selected: false
+        };
+        
+        this.materialsListSelectedElements.forEach(x => workPackage.modelElements.push(
+          {
+            guid: x.GlobalId.value,
+            expressId: x.expressID,
+            ifcType: x.ifcType,
+            ifcStorey: x.buildingStorey,
+            name: x.Name.value,
+            objectType: x.ObjectType.value
+          }
+        ));
 
-      WorkPackageDataService.create(workPackage)
-        .then(response => {
-          console.log('wp save api response: ', response.data);
-          this.submitted = true;
-          workPackage.workPackageId = response.data.workPackageId;
-          this.workPackages.push(workPackage);
-        })
-        .catch(e => {
-          console.log(e);
-        });
+        WorkPackageDataService.create(workPackage)
+          .then(response => {
+            console.log('wp save api response: ', response.data);
+            this.submitted = true;
+            workPackage.workPackageId = response.data.workPackageId;
+            this.workPackages.push(workPackage);
+          })
+          .catch(e => {
+            console.log(e);
+          });
 
-      // update element exist in wp
-      this.materialsListSelectedElements.forEach(x => x.existsInWorkpackage = true);
-      this.$emit('workPackagesUpdated', this.workPackages);
-      
-      this.closeWpModal();
+        // update element exist in wp
+        this.materialsListSelectedElements.forEach(x => x.existsInWorkpackage = true);
+        this.$emit('workPackagesUpdated', this.workPackages);
+        
+        this.closeWpModal();
+        this.showCodeRequiredError = false;
+      }
     },
     // Get list of classificators
     getClassificators() {
@@ -236,7 +269,7 @@ export default {
       this.anyClassificator = true;
     },
     // Load all existing work packages for this project
-    loadExistingWorkPackages(){
+    getExistingWorkPackages(){
       WorkPackageDataService.getByProject(this.projectId)
         .then(response => {
           this.workPackages = response.data;
@@ -264,6 +297,11 @@ export default {
 <style>
 .error {
   color: red;
+}
+
+.align-left {
+  text-align: left;
+  float: left;
 }
 
 #materials-table {
@@ -318,15 +356,6 @@ export default {
   float: right;
 }
 
-/*
- * The following styles are auto-applied to elements with
- * transition="modal" when their visibility is toggled
- * by Vue.js.
- *
- * You can easily play with the modal transition by editing
- * these styles.
- */
-
 .modal-enter-from {
   opacity: 0;
 }
@@ -339,5 +368,9 @@ export default {
 .modal-leave-to .modal-container {
   -webkit-transform: scale(1.1);
   transform: scale(1.1);
+}
+
+.error {
+  color: red;
 }
 </style>

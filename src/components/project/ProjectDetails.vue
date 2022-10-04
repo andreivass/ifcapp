@@ -38,6 +38,7 @@
                   <ListOfWorkPackages 
                   ref="listOfWorkPackages"
                   @listElementsSelectionChange="updateViewerSelectedElements" 
+                  @workPackageDeleted="workPackageDeleted"
                   :workPackages="this.workPackages"
                   />
                 </div>
@@ -146,6 +147,10 @@ export default {
     // Update work packages on change from IFC list
     workPackagesUpdatedInIfcList(workPackages){
       this.workPackages = workPackages;
+    },
+    // Update work packages list on delete
+    workPackageDeleted(wp){
+      this.workPackages = this.workPackages.filter(e => e !== wp)
     }
   },
   mounted() {

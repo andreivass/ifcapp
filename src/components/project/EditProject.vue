@@ -7,24 +7,30 @@
         <input type="text" class="form-control" id="name"
           v-model="currentProject.name"/>
       </div>
+      <label v-if="showNameRequiredError" class="error">Väli Nimi on kohustuslik</label>
       <div class="form-group">
         <label for="description">Kirjeldus</label>
         <input type="text" class="form-control" id="description"
           v-model="currentProject.description"/>
       </div>
       <div class="form-group">
-        <label for="description">Kood</label>
+        <label for="code">Kood</label>
         <input type="text" class="form-control" id="code"
           v-model="currentProject.code"/>
+          <label v-if="showCodeRequiredError" class="error">Väli Kood on kohustuslik</label>
       </div>
     </form>
-    <button class="btn btn-danger mt-2"
-      @click="deleteProject">
+    <button v-if="!showDeleteConfirm" class="btn btn-danger mt-2" @click="showConfirmDelete">
       Kustuta
     </button>
-    <button type="submit" class="btn btn-success mt-2"
-      @click="updateProject">
+    <button v-if="!showDeleteConfirm" type="submit" class="btn btn-success mt-2" @click="updateProject">
       Salvesta
+    </button>
+    <button v-if="showDeleteConfirm" class="btn btn-secondary mt-2" @click="showConfirmDelete">
+      Loobu
+    </button>
+    <button v-if="showDeleteConfirm" class="btn btn-danger mt-2" @click="deleteProject">
+      Kinnita kustutamine
     </button>
     <p>{{ message }}</p>
   </div>
@@ -42,7 +48,10 @@ export default {
   data() {
     return {
       currentProject: null,
-      message: ''
+      message: '',
+      showNameRequiredError: false,
+      showCodeRequiredError: false,
+      showDeleteConfirm: false
     };
   },
   methods: {
@@ -58,9 +67,14 @@ export default {
         });
     },
     // Save updated project
-    // TODO: add validation
     updateProject() {
-      ProjectDataService.update(this.currentProject.projectId, this.currentProject)
+      if (this.currentProject.name == '') {
+        this.showNameRequiredError = true;
+      } else if (this.currentProject.code == '') { 
+        this.showNameRequiredError = false;
+        this.showCodeRequiredError = true;
+      } else {
+        ProjectDataService.update(this.currentProject.projectId, this.currentProject)
         .then(response => {
           console.log(response.data);
           this.message = 'Projekt salvestatud!';
@@ -69,10 +83,14 @@ export default {
         .catch(e => {
           console.log(e);
         });
+      }
+    },
+    // Confitm delete
+    showConfirmDelete(){
+      this.showDeleteConfirm = !this.showDeleteConfirm;
     },
     // Delete project
     deleteProject() {
-      // TODO: add confirmation for delete
       ProjectDataService.delete(this.currentProject.projectId)
         .then(response => {
           console.log(response.data);
@@ -94,5 +112,9 @@ export default {
 .edit-form {
   max-width: 300px;
   margin: auto;
+}
+
+.error {
+  color: red;
 }
 </style>
