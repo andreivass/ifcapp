@@ -142,8 +142,8 @@ export default {
                 return buidingArray;
             } else {
                 for (let i = 0; i < ifcNode.children.length; i++) {
-                    let element = ifcNode.children[i];                    
-
+                    let element = ifcNode.children[i];
+                               
                     // Get detailed property object.
                     let elementAllProps = await this.IFCManager.ifcLoader.ifcManager.getItemProperties(0, element.expressID, true);
                     
@@ -160,9 +160,10 @@ export default {
                     // Add prop for selection.
                     elementAllProps.selected = false;
 
-                    // Add object to parent building storey.
-                    buidingArray.push(elementAllProps);
-                    
+                    // Add object to parent building storey, filter out site and building elements
+                    if (element.type !== 'IFCSITE' && element.type !== 'IFCBUILDING'){
+                        buidingArray.push(elementAllProps);
+                    }
                     // Call method recursively on child elements.
                     await this.parseTree(element, buidingArray, storeyName);
                 }
