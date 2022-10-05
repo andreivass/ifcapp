@@ -8,12 +8,18 @@
         </li>
       </div>
       <div class="navbar-nav">
-        <li class="nav-item mr-sm-2">
-          <router-link to="/addproject" class="nav-link">Login</router-link>
+        <li v-if="!this.$store.state.auth.status.loggedIn" class="nav-item mr-sm-2">
+          <router-link to="/register" class="nav-link">Registreeri kasutaja</router-link>
         </li>
-        <li class="nav-item mr-sm-2">
-          <router-link to="/addproject" class="nav-link">Logout</router-link>
+        <li v-if="!this.$store.state.auth.status.loggedIn" class="nav-item mr-sm-2">
+          <router-link to="/login" class="nav-link">Logi sisse</router-link>
         </li>
+        <li v-if="this.$store.state.auth.status.loggedIn" class="nav-item mr-sm-2">
+          <button class="btn btn-danger mt-2" @click="logOut">Logi välja</button>
+        </li>
+        <!-- <li class="nav-item mr-sm-2">
+          <router-link to="/logout" class="nav-link">Logi välja</router-link> TODO: logOut() 
+        </li> -->
       </div>
     </nav>
     <div class="container mt-3">
@@ -25,7 +31,14 @@
 <script>
 
 export default {
-  name: 'App'
+  name: 'App',
+  methods: {
+    logOut() {
+      this.$store.dispatch('auth/logout');
+      this.$router.push('/login');
+      this.userLoggedIn = false;
+    }
+  }
 }
 </script>
 

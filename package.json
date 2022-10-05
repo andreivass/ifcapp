@@ -15,7 +15,7 @@
     "vue": "^3.0.0",
     "vue-router": "4",
     "vue-tree-list": "^1.5.0",
-    "vuex": "^3.6.2",
+    "vuex": "^4.0.2",
     "web-ifc-three": "^0.0.103"
   },
   "devDependencies": {
@@ -24,6 +24,7 @@
     "@vue/cli-service": "~4.5.0",
     "@vue/compiler-sfc": "^3.0.0",
     "babel-eslint": "^10.1.0",
+    "case-sensitive-paths-webpack-plugin": "^2.4.0",
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^7.0.0"
   },

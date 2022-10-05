@@ -1,12 +1,10 @@
-// import { createStore } from 'vuex';
+import { createStore } from "vuex";
+import { auth } from "./authModule";
 
-// export default createStore({
-//   state: {
-//     authModalShow: false,
-//   },
-//   mutations: {
-//     toggleAuthModal: (state) => {
-//         state.authModalShow = !state.authModalShow;
-//       },
-//   }
-// })
+const store = createStore({
+  modules: {
+    auth,
+  },
+});
+
+export default store;
