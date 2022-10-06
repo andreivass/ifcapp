@@ -10,18 +10,18 @@
                 <th scope="col">Korrus</th>
                 <th scope="col">IFC Tüüp</th>
                 <th scope="col">Nimi</th>
+                <th scope="col">Kasutusel</th>
             </tr>
         </thead>
         <tbody v-if="ifcElementsArray.length > 0">
             <tr v-for="(element, index) in ifcElementsArray" :key=element.expressId>
                 <td><input type="checkbox" id="checkbox" v-model="element.selected" @change="elementSelect(element)"></td>
-                
-                <td v-if="element.existsInWorkpackage === true" class="table-info">{{ index + 1 }}</td>
-                <td v-else>{{ index + 1 }}</td>
-
+                <td>{{ index + 1 }}</td>
                 <td>{{ element.buildingStorey }}</td>
                 <td>{{ element.ifcType }}</td>
                 <td>{{ element.Name?.value }}</td>
+                <td v-if="element.existsInWorkpackage === true">+</td>
+                <td v-else></td>
             </tr>
         </tbody>
         <tbody v-else>

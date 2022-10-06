@@ -1,7 +1,7 @@
 <template>
     <nav class="nav flex-column nav-pills">
         <div class="sidebar-header">
-            <h4>Projekti menüü</h4>
+            <h4>Vali vaade</h4>
         </div>
       <div class="navbar-nav mr-auto">
         <li class="nav-item">

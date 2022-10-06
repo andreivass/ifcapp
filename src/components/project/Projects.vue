@@ -26,10 +26,7 @@
           <label><strong>Kood:</strong></label> {{ currentProject.code }}
         </div>
         <div>
-          <label><strong>IFC faili nimi:</strong></label> {{ currentProject.ifcfilename }}
-        </div>
-        <div>
-          <label><strong>Loodud tööpakette:</strong></label> {{ currentProject.workpackages ? currentProject.workpackages.count() : 0 }}
+          <label><strong>IFC faili nimi:</strong></label> {{ currentProject.ifcFileName }}
         </div>
         <div>
           <router-link  :to="'/project/' + currentProject.projectId" class="btn btn-outline-primary">Ava projekt</router-link>
@@ -38,7 +35,7 @@
       </div>
       <div v-else>
         <br />
-        <p>Vali projekt nimekirjast...</p>
+        <p>Vali projekt nimekirjast või lisa uus</p>
       </div>
     </div>
     <div class="mt-3">
@@ -66,7 +63,6 @@ export default {
       ProjectDataService.getAll()
         .then(response => {
           this.projects = response.data;
-          console.log(response.data);
         })
         .catch(e => {
           console.log(e);

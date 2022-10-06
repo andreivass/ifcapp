@@ -1,5 +1,5 @@
 <template>
-    App flow chart:
+    Kliendi teekonna skeem:
     <img id="flow-chart" src="\ifc-app-flow-chart.png" />
 </template>
 

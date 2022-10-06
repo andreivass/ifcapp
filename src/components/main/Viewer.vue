@@ -161,7 +161,9 @@ export default {
                     elementAllProps.selected = false;
 
                     // Add object to parent building storey, filter out site and building elements
-                    if (element.type !== 'IFCSITE' && element.type !== 'IFCBUILDING'){
+                    if (element.type !== 'IFCSITE' 
+                    && element.type !== 'IFCBUILDING'
+                    && element.type !== 'IFCSPACE'){
                         buidingArray.push(elementAllProps);
                     }
                     // Call method recursively on child elements.

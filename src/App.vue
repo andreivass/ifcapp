@@ -1,25 +1,22 @@
 <template>
   <div id="app">
-    <nav class="navbar navbar-expand navbar-dark bg-dark">
-      <router-link to="/" class="navbar-brand">IFCapp</router-link>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <router-link id="logo" to="/" class="navbar-brand">dreIFC</router-link>
       <div class="navbar-nav me-auto">
         <li class="nav-item">
-          <router-link to="/projects" class="nav-link">Projektid</router-link>
+          <router-link to="/projects" class="nav-link btn btn-dark mt-2">Projektid</router-link>
         </li>
       </div>
       <div class="navbar-nav">
         <li v-if="!this.$store.state.auth.status.loggedIn" class="nav-item mr-sm-2">
-          <router-link to="/register" class="nav-link">Registreeri kasutaja</router-link>
+          <router-link to="/register" class="nav-link btn btn-dark mt-2">Registreeri kasutaja</router-link>
         </li>
         <li v-if="!this.$store.state.auth.status.loggedIn" class="nav-item mr-sm-2">
-          <router-link to="/login" class="nav-link">Logi sisse</router-link>
+          <router-link to="/login" class="nav-link btn btn-dark mt-2">Logi sisse</router-link>
         </li>
         <li v-if="this.$store.state.auth.status.loggedIn" class="nav-item mr-sm-2">
-          <button class="btn btn-danger mt-2" @click="logOut">Logi välja</button>
+          <button class="btn btn-dark mt-2" @click="logOut">Logi välja</button>
         </li>
-        <!-- <li class="nav-item mr-sm-2">
-          <router-link to="/logout" class="nav-link">Logi välja</router-link> TODO: logOut() 
-        </li> -->
       </div>
     </nav>
     <div class="container mt-3">
@@ -55,5 +52,9 @@ export default {
 
 #body {
   background-color:slategray;
+}
+
+#logo {
+  margin-left: 10px;
 }
 </style>

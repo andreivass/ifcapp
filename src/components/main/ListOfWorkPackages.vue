@@ -25,7 +25,7 @@
         </tbody>
         <tbody v-else>
             <tr>
-                Andmed ei ole veel sisse laetud.
+                Tööpaketid puuduvad või andmed ei ole veel sisse laetud.
             </tr>
         </tbody>
     </table>
