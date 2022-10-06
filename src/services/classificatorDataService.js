@@ -1,19 +1,9 @@
 import http from "../http-common";
+import authHeader from './authHeader';
+
 class ClassificatorDataService {
   getAll() {
-    return http.get("/ccieepps");
-  }
-  get(id) {
-    return http.get(`/ccieepps/${id}`);
-  }
-  create(data) {
-    return http.post("/ccieepps", data);
-  }
-  update(id, data) {
-    return http.put(`/ccieepps/${id}`, data);
-  }
-  delete(id) {
-    return http.delete(`/ccieepps/${id}`);
+    return http.get("/ccieepps", { headers: authHeader()});
   }
 }
 export default new ClassificatorDataService();
