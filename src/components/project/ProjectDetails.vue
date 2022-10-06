@@ -101,7 +101,7 @@ export default {
     // Update selected elements on change from Viewer
     updateListSelectedElements(selectedElementId){
         var existing = this.projectSelectedElements.find(x => x.expressID === selectedElementId);
-        if (existing !== null){
+        if (existing != undefined){
           this.projectSelectedElements = this.projectSelectedElements.filter(x => x.expressID !== selectedElementId)
         }
         else{

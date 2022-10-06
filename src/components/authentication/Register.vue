@@ -97,9 +97,9 @@ export default {
         this.submitted = true;
 
         this.$store.dispatch('auth/register', this.user).then(
-            data => {
-              // TODO: error handling.
-            this.message = data.token;
+            () => {
+              // TODO: succ handling + nav to projects/login
+            this.message = 'Registreerimine edukas.';
             this.successful = true;
             },
             error => {

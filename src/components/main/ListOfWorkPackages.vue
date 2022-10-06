@@ -147,7 +147,7 @@ export default {
     // Open work package edit modal
     editWp(wp){
       this.modalWorkPackage = wp;
-      this.wpModalHeader = 'Muud tööpaketti'
+      this.wpModalHeader = 'Muuda tööpaketti'
 
       this.workPackageFormModel.code = wp.code;
       this.workPackageFormModel.description = wp.description;

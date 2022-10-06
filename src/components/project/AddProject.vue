@@ -62,7 +62,6 @@ export default {
         ProjectDataService.create(data)
           .then(response => {
             this.project.id = response.data.id;
-            console.log(response.data);
             this.submitted = true;
             this.$router.push('projects');
           })
