@@ -228,7 +228,7 @@ export default {
             ifcType: x.ifcType,
             ifcStorey: x.buildingStorey,
             name: x.Name.value,
-            objectType: x.ObjectType.value
+            objectType: x.ObjectType == null ? "No object type found" : x.ObjectType.value
           }
         ));
 
@@ -237,6 +237,7 @@ export default {
             console.log('wp save api response: ', response.data);
             this.submitted = true;
             workPackage.workPackageId = response.data.workPackageId;
+            workPackage.classificatorNameEe = response.data.classificatorNameEe;
             this.workPackages.push(workPackage);
           })
           .catch(e => {
