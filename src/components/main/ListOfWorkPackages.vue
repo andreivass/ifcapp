@@ -184,7 +184,6 @@ export default {
         this.showNameRequiredError = false;
         this.showCodeRequiredError = true;
       } else {
-        console.log('save wp');
         var workPackage = {
           workPackageId: this.modalWorkPackage.workPackageId,
           name: this.workPackageFormModel.name,

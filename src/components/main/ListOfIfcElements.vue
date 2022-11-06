@@ -199,6 +199,10 @@ export default {
         classificator.selected = false;
       }
       this.anyClassificator = false;
+      
+      this.workPackageFormModel.name = '';
+      this.workPackageFormModel.code = '';
+      this.workPackageFormModel.description = '';
     },
     // Save WP
     saveWorkPackage(){
@@ -239,6 +243,9 @@ export default {
             workPackage.workPackageId = response.data.workPackageId;
             workPackage.classificatorNameEe = response.data.classificatorNameEe;
             this.workPackages.push(workPackage);
+            this.workPackageFormModel.name = '';
+            this.workPackageFormModel.code = '';
+            this.workPackageFormModel.description = '';
           })
           .catch(e => {
             console.log(e);
